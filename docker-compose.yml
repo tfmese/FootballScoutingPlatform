@@ -1,0 +1,20 @@
+
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: scouting_postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: player_db
+    ports:
+      - "5432:5432"
+
+  mongo-db:
+    image: mongo:latest
+    container_name: scouting_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"

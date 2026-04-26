@@ -17,12 +17,15 @@ public class PlayerService {
     }
 
     public Player createPlayer(String name, String position, int age) {
-        Player player = Player.create(name, position, age);
-        return playerRepository.save(player);
+        return playerRepository.save(newPlayer(name, position, age));
     }
 
     public Player getPlayerById(UUID playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    }
+
+    private Player newPlayer(String name, String position, int age) {
+        return Player.create(name, position, age);
     }
 }

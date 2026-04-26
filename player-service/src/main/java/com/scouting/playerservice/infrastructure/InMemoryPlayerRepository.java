@@ -11,16 +11,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 public class InMemoryPlayerRepository implements PlayerRepository {
-    private final Map<UUID, Player> players = new ConcurrentHashMap<>();
+    private final Map<UUID, Player> playerStore = new ConcurrentHashMap<>();
 
     @Override
     public Player save(Player player) {
-        players.put(player.getId(), player);
+        playerStore.put(player.getId(), player);
         return player;
     }
 
     @Override
     public Optional<Player> findById(UUID id) {
-        return Optional.ofNullable(players.get(id));
+        return Optional.ofNullable(playerStore.get(id));
     }
 }

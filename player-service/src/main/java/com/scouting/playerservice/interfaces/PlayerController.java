@@ -26,13 +26,21 @@ public class PlayerController {
     @PostMapping
     public ResponseEntity<ApiResponse<Player>> createPlayer(@RequestBody CreatePlayerRequest request) {
         Player created = playerService.createPlayer(request.name(), request.position(), request.age());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>("Player created", created));
+        return created(created);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Player>> getPlayerById(@PathVariable UUID id) {
         Player player = playerService.getPlayerById(id);
+        return ok(player);
+    }
+
+    private ResponseEntity<ApiResponse<Player>> created(Player player) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>("Player created", player));
+    }
+
+    private ResponseEntity<ApiResponse<Player>> ok(Player player) {
         return ResponseEntity.ok(new ApiResponse<>("Player retrieved", player));
     }
 }

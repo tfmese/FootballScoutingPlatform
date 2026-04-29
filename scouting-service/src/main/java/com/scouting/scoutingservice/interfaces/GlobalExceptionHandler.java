@@ -30,8 +30,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected() {
+    public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("Unexpected error occurred"));
+                .body(new ErrorResponse("Unexpected error occurred: " + ex.getMessage()));
     }
 }

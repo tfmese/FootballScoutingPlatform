@@ -12,8 +12,12 @@ spring:
           uri: http://localhost:8081
           predicates:
             - Path=/api/players/**
+          filters:
+            - StripPrefix=1
 
         - id: scouting-service-route
           uri: http://localhost:8082
           predicates:
             - Path=/api/scouts/**
+          filters:
+            - StripPrefix=1

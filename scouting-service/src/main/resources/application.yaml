@@ -7,7 +7,3 @@ spring:
 
   mongodb:
     uri: mongodb://root:password@localhost:27017/scouting_db?authSource=admin
-
-  data:
-    mongodb:
-      uri: mongodb://root:password@localhost:27017/scouting_db?authSource=admin

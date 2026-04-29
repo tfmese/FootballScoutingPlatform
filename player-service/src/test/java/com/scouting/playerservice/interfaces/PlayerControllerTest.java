@@ -10,14 +10,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.UUID;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,5 +71,47 @@ class PlayerControllerTest {
         mockMvc.perform(get("/players/{id}", playerId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Player not found: " + playerId));
+    }
+
+    @Test
+    void getPlayersShouldReturnAllPlayers() throws Exception {
+        Player first = new Player(UUID.randomUUID(), "A", "CB", 24);
+        Player second = new Player(UUID.randomUUID(), "B", "RB", 25);
+        when(playerService.getAllPlayers()).thenReturn(List.of(first, second));
+
+        mockMvc.perform(get("/players"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(2));
+    }
+
+    @Test
+    void putPlayerShouldReturnOk() throws Exception {
+        UUID playerId = UUID.randomUUID();
+        Player updated = new Player(playerId, "Updated", "CM", 27);
+        when(playerService.updatePlayer(eq(playerId), anyString(), anyString(), anyInt())).thenReturn(updated);
+
+        mockMvc.perform(put("/players/{id}", playerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Updated\",\"position\":\"CM\",\"age\":27}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("Updated"));
+    }
+
+    @Test
+    void deletePlayerShouldReturnNoContent() throws Exception {
+        UUID playerId = UUID.randomUUID();
+        doNothing().when(playerService).deletePlayer(eq(playerId));
+
+        mockMvc.perform(delete("/players/{id}", playerId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void postPlayersWithInvalidBodyShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/players")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"\",\"position\":\"RB\",\"age\":10}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
     }
 }

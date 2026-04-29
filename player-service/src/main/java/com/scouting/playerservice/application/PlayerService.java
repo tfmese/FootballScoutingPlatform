@@ -5,6 +5,7 @@ import com.scouting.playerservice.domain.PlayerNotFoundException;
 import com.scouting.playerservice.domain.PlayerRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,6 +24,21 @@ public class PlayerService {
     public Player getPlayerById(UUID playerId) {
         return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
+    }
+
+    public List<Player> getAllPlayers() {
+        return playerRepository.findAll();
+    }
+
+    public Player updatePlayer(UUID playerId, String name, String position, int age) {
+        Player existing = getPlayerById(playerId);
+        existing.update(name, position, age);
+        return playerRepository.save(existing);
+    }
+
+    public void deletePlayer(UUID playerId) {
+        Player existing = getPlayerById(playerId);
+        playerRepository.deleteById(existing.getId());
     }
 
     private Player newPlayer(String name, String position, int age) {

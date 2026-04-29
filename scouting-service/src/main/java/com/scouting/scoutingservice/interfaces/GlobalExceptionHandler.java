@@ -1,6 +1,6 @@
-package com.scouting.playerservice.interfaces;
+package com.scouting.scoutingservice.interfaces;
 
-import com.scouting.playerservice.domain.PlayerNotFoundException;
+import com.scouting.scoutingservice.domain.ScoutReportNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,15 +12,15 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(PlayerNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlePlayerNotFound(PlayerNotFoundException exception) {
+    @ExceptionHandler(ScoutReportNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ScoutReportNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(exception.getMessage()));
+                .body(new ErrorResponse(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException exception) {
-        String message = exception.getBindingResult()
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception) {
+    public ResponseEntity<ErrorResponse> handleUnexpected() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("Unexpected error occurred"));
     }

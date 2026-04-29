@@ -1,12 +1,29 @@
 package com.scouting.playerservice.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 import java.util.UUID;
 
+@Entity
+@Table(name = "players")
 public class Player {
-    private final UUID id;
-    private final String name;
-    private final String position;
-    private final int age;
+    @Id
+    private UUID id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String position;
+
+    @Column(nullable = false)
+    private int age;
+
+    protected Player() {
+    }
 
     public Player(UUID id, String name, String position, int age) {
         this.id = id;
@@ -17,6 +34,12 @@ public class Player {
 
     public static Player create(String name, String position, int age) {
         return new Player(UUID.randomUUID(), name, position, age);
+    }
+
+    public void update(String name, String position, int age) {
+        this.name = name;
+        this.position = position;
+        this.age = age;
     }
 
     public UUID getId() {

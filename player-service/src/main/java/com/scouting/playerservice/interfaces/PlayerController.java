@@ -4,7 +4,6 @@ import com.scouting.common.model.PagedResult;
 import com.scouting.playerservice.application.PlayerService;
 import com.scouting.playerservice.domain.Player;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,19 +30,19 @@ public class PlayerController {
     @PostMapping
     public ResponseEntity<ApiResponse<Player>> createPlayer(@Valid @RequestBody CreatePlayerRequest request) {
         Player created = playerService.createPlayer(request.name(), request.position(), request.age());
-        return created(created);
+        return ResponseFactory.created("Player created", created);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Player>> getPlayerById(@PathVariable UUID id) {
         Player player = playerService.getPlayerById(id);
-        return ok(player);
+        return ResponseFactory.ok("Player retrieved", player);
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResult<Player>>> getAllPlayers() {
         List<Player> players = playerService.getAllPlayers();
-        return ResponseEntity.ok(new ApiResponse<>("Players retrieved", PagedResult.of(players)));
+        return ResponseFactory.ok("Players retrieved", PagedResult.of(players));
     }
 
     @PutMapping("/{id}")
@@ -52,21 +51,12 @@ public class PlayerController {
             @Valid @RequestBody UpdatePlayerRequest request
     ) {
         Player updated = playerService.updatePlayer(id, request.name(), request.position(), request.age());
-        return ok(updated);
+        return ResponseFactory.ok("Player updated", updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlayer(@PathVariable UUID id) {
         playerService.deletePlayer(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private ResponseEntity<ApiResponse<Player>> created(Player player) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>("Player created", player));
-    }
-
-    private ResponseEntity<ApiResponse<Player>> ok(Player player) {
-        return ResponseEntity.ok(new ApiResponse<>("Player retrieved", player));
     }
 }

@@ -11,6 +11,7 @@
 
     <modules>
         <module>api-gateway</module>
+        <module>common</module>
         <module>player-service</module>
         <module>scouting-service</module>
         <module>desktop-gui</module>

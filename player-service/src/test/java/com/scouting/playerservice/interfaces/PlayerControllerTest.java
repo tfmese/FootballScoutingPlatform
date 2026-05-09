@@ -81,7 +81,7 @@ class PlayerControllerTest {
 
         mockMvc.perform(get("/players"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(2));
+                .andExpect(jsonPath("$.data.items.length()").value(2));
     }
 
     @Test

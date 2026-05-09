@@ -1,5 +1,6 @@
 package com.scouting.scoutingservice.interfaces;
 
+import com.scouting.common.model.PagedResult;
 import com.scouting.scoutingservice.application.ScoutReportService;
 import com.scouting.scoutingservice.domain.ScoutReport;
 import jakarta.validation.Valid;
@@ -44,8 +45,8 @@ public class ScoutReportController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ScoutReport>>> getAll() {
-        return ResponseEntity.ok(new ApiResponse<>("Scout reports retrieved", service.getAll()));
+    public ResponseEntity<ApiResponse<PagedResult<ScoutReport>>> getAll() {
+        return ResponseEntity.ok(new ApiResponse<>("Scout reports retrieved", PagedResult.of(service.getAll())));
     }
 
     @PutMapping("/{id}")

@@ -69,7 +69,7 @@ class ScoutReportControllerTest {
 
         mockMvc.perform(get("/scouts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(2));
+                .andExpect(jsonPath("$.data.items.length()").value(2));
     }
 
     @Test

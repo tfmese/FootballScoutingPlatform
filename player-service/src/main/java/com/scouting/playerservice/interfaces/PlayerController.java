@@ -1,5 +1,6 @@
 package com.scouting.playerservice.interfaces;
 
+import com.scouting.common.model.PagedResult;
 import com.scouting.playerservice.application.PlayerService;
 import com.scouting.playerservice.domain.Player;
 import jakarta.validation.Valid;
@@ -40,9 +41,9 @@ public class PlayerController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Player>>> getAllPlayers() {
+    public ResponseEntity<ApiResponse<PagedResult<Player>>> getAllPlayers() {
         List<Player> players = playerService.getAllPlayers();
-        return ResponseEntity.ok(new ApiResponse<>("Players retrieved", players));
+        return ResponseEntity.ok(new ApiResponse<>("Players retrieved", PagedResult.of(players)));
     }
 
     @PutMapping("/{id}")

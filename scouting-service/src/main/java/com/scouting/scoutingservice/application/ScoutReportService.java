@@ -6,6 +6,7 @@ import com.scouting.scoutingservice.domain.ScoutReportRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ScoutReportService {
@@ -16,8 +17,8 @@ public class ScoutReportService {
         this.repository = repository;
     }
 
-    public ScoutReport create(String playerName, String position, int potentialScore, String notes) {
-        return repository.save(ScoutReport.create(playerName, position, potentialScore, notes));
+    public ScoutReport create(UUID playerId, String playerName, String position, int potentialScore, String notes) {
+        return repository.save(ScoutReport.create(playerId, playerName, position, potentialScore, notes));
     }
 
     public ScoutReport getById(String id) {
@@ -29,9 +30,9 @@ public class ScoutReportService {
         return repository.findAll();
     }
 
-    public ScoutReport update(String id, String playerName, String position, int potentialScore, String notes) {
+    public ScoutReport update(String id, UUID playerId, String playerName, String position, int potentialScore, String notes) {
         ScoutReport report = getById(id);
-        report.update(playerName, position, potentialScore, notes);
+        report.update(playerId, playerName, position, potentialScore, notes);
         return repository.save(report);
     }
 

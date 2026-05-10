@@ -4,7 +4,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.UUID;
+
 public record CreateScoutReportRequest(
+        UUID playerId,
         @NotBlank(message = "playerName is required")
         String playerName,
         @NotBlank(message = "position is required")

@@ -30,6 +30,7 @@ public class ScoutReportController {
     @PostMapping
     public ResponseEntity<ApiResponse<ScoutReport>> create(@Valid @RequestBody CreateScoutReportRequest request) {
         ScoutReport created = service.create(
+                request.playerId(),
                 request.playerName(),
                 request.position(),
                 request.potentialScore(),
@@ -56,6 +57,7 @@ public class ScoutReportController {
     ) {
         ScoutReport updated = service.update(
                 id,
+                request.playerId(),
                 request.playerName(),
                 request.position(),
                 request.potentialScore(),

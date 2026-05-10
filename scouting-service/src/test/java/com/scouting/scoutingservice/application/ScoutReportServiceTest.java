@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,15 +28,17 @@ class ScoutReportServiceTest {
 
     @Test
     void createShouldGenerateId() {
-        ScoutReport created = service.create("Arda Guler", "AM", 92, "Excellent creativity");
+        UUID playerId = UUID.randomUUID();
+        ScoutReport created = service.create(playerId, "Arda Guler", "AM", 92, "Excellent creativity");
 
         assertNotNull(created.getId());
         assertEquals("Arda Guler", created.getPlayerName());
+        assertEquals(playerId, created.getPlayerId());
     }
 
     @Test
     void getByIdWhenExistsShouldReturnReport() {
-        ScoutReport created = service.create("Kenan Yildiz", "LW", 88, "Strong dribbling");
+        ScoutReport created = service.create(null, "Kenan Yildiz", "LW", 88, "Strong dribbling");
 
         ScoutReport found = service.getById(created.getId());
 
@@ -44,17 +47,19 @@ class ScoutReportServiceTest {
 
     @Test
     void updateShouldPersistChanges() {
-        ScoutReport created = service.create("Old Name", "CM", 70, "Old");
+        ScoutReport created = service.create(null, "Old Name", "CM", 70, "Old");
 
-        ScoutReport updated = service.update(created.getId(), "New Name", "CDM", 78, "Updated");
+        UUID playerId = UUID.randomUUID();
+        ScoutReport updated = service.update(created.getId(), playerId, "New Name", "CDM", 78, "Updated");
 
         assertEquals("New Name", updated.getPlayerName());
         assertEquals(78, updated.getPotentialScore());
+        assertEquals(playerId, updated.getPlayerId());
     }
 
     @Test
     void deleteShouldRemoveReport() {
-        ScoutReport created = service.create("Delete", "CB", 66, "To be removed");
+        ScoutReport created = service.create(null, "Delete", "CB", 66, "To be removed");
 
         service.delete(created.getId());
 
@@ -63,8 +68,8 @@ class ScoutReportServiceTest {
 
     @Test
     void getAllShouldReturnAllReports() {
-        service.create("One", "RB", 75, "n1");
-        service.create("Two", "LB", 79, "n2");
+        service.create(null, "One", "RB", 75, "n1");
+        service.create(null, "Two", "LB", 79, "n2");
 
         List<ScoutReport> reports = service.getAll();
 
@@ -80,7 +85,7 @@ class ScoutReportServiceTest {
             String id = report.getId();
             if (id == null) {
                 id = String.valueOf(++idSeed);
-                report = new ScoutReport(id, report.getPlayerName(), report.getPosition(), report.getPotentialScore(), report.getNotes());
+                report = new ScoutReport(id, report.getPlayerId(), report.getPlayerName(), report.getPosition(), report.getPotentialScore(), report.getNotes());
             }
             storage.put(id, report);
             return report;

@@ -3,10 +3,13 @@ package com.scouting.scoutingservice.domain;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.UUID;
+
 @Document(collection = "scout_reports")
 public class ScoutReport {
     @Id
     private String id;
+    private UUID playerId;
     private String playerName;
     private String position;
     private int potentialScore;
@@ -16,18 +19,24 @@ public class ScoutReport {
     }
 
     public ScoutReport(String id, String playerName, String position, int potentialScore, String notes) {
+        this(id, null, playerName, position, potentialScore, notes);
+    }
+
+    public ScoutReport(String id, UUID playerId, String playerName, String position, int potentialScore, String notes) {
         this.id = id;
+        this.playerId = playerId;
         this.playerName = playerName;
         this.position = position;
         this.potentialScore = potentialScore;
         this.notes = notes;
     }
 
-    public static ScoutReport create(String playerName, String position, int potentialScore, String notes) {
-        return new ScoutReport(null, playerName, position, potentialScore, notes);
+    public static ScoutReport create(UUID playerId, String playerName, String position, int potentialScore, String notes) {
+        return new ScoutReport(null, playerId, playerName, position, potentialScore, notes);
     }
 
-    public void update(String playerName, String position, int potentialScore, String notes) {
+    public void update(UUID playerId, String playerName, String position, int potentialScore, String notes) {
+        this.playerId = playerId;
         this.playerName = playerName;
         this.position = position;
         this.potentialScore = potentialScore;
@@ -36,6 +45,10 @@ public class ScoutReport {
 
     public String getId() {
         return id;
+    }
+
+    public UUID getPlayerId() {
+        return playerId;
     }
 
     public String getPlayerName() {

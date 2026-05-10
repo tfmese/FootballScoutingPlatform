@@ -10,9 +10,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -40,12 +42,13 @@ class ScoutReportControllerTest {
 
     @Test
     void postScoutsShouldReturnCreated() throws Exception {
-        ScoutReport report = new ScoutReport("1", "Arda Guler", "AM", 90, "Top talent");
-        when(service.create(anyString(), anyString(), anyInt(), anyString())).thenReturn(report);
+        UUID playerId = UUID.randomUUID();
+        ScoutReport report = new ScoutReport("1", playerId, "Arda Guler", "AM", 90, "Top talent");
+        when(service.create(any(UUID.class), anyString(), anyString(), anyInt(), anyString())).thenReturn(report);
 
         mockMvc.perform(post("/scouts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"playerName\":\"Arda Guler\",\"position\":\"AM\",\"potentialScore\":90,\"notes\":\"Top talent\"}"))
+                        .content("{\"playerId\":\"" + playerId + "\",\"playerName\":\"Arda Guler\",\"position\":\"AM\",\"potentialScore\":90,\"notes\":\"Top talent\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.playerName").value("Arda Guler"));
     }
@@ -74,12 +77,13 @@ class ScoutReportControllerTest {
 
     @Test
     void putScoutsShouldReturnUpdated() throws Exception {
-        ScoutReport report = new ScoutReport("1", "Updated", "CM", 82, "updated");
-        when(service.update(eq("1"), anyString(), anyString(), anyInt(), anyString())).thenReturn(report);
+        UUID playerId = UUID.randomUUID();
+        ScoutReport report = new ScoutReport("1", playerId, "Updated", "CM", 82, "updated");
+        when(service.update(eq("1"), any(UUID.class), anyString(), anyString(), anyInt(), anyString())).thenReturn(report);
 
         mockMvc.perform(put("/scouts/{id}", "1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"playerName\":\"Updated\",\"position\":\"CM\",\"potentialScore\":82,\"notes\":\"updated\"}"))
+                        .content("{\"playerId\":\"" + playerId + "\",\"playerName\":\"Updated\",\"position\":\"CM\",\"potentialScore\":82,\"notes\":\"updated\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.playerName").value("Updated"));
     }

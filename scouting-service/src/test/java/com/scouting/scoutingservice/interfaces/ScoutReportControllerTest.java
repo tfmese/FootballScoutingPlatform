@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -110,6 +111,45 @@ class ScoutReportControllerTest {
         mockMvc.perform(post("/scouts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerName\":\"\",\"position\":\"AM\",\"potentialScore\":0,\"notes\":\"\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void postScoutsWithInvalidPlayerIdShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/scouts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"playerId\":\"not-a-valid-uuid\",\"playerName\":\"X\",\"position\":\"AM\",\"potentialScore\":50,\"notes\":\"n\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void postScoutsWithEmptyStringPlayerIdShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/scouts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"playerId\":\"\",\"playerName\":\"X\",\"position\":\"AM\",\"potentialScore\":50,\"notes\":\"n\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void postScoutsWithoutPlayerIdShouldReturnCreated() throws Exception {
+        ScoutReport report = new ScoutReport("1", null, "Legacy", "ST", 70, "no player link");
+        when(service.create(isNull(), anyString(), anyString(), anyInt(), anyString())).thenReturn(report);
+
+        mockMvc.perform(post("/scouts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"playerName\":\"Legacy\",\"position\":\"ST\",\"potentialScore\":70,\"notes\":\"no player link\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.playerName").value("Legacy"));
+    }
+
+    @Test
+    void putScoutsWithInvalidPlayerIdShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(put("/scouts/{id}", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"playerId\":\"bad\",\"playerName\":\"X\",\"position\":\"AM\",\"potentialScore\":50,\"notes\":\"n\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").exists());
     }

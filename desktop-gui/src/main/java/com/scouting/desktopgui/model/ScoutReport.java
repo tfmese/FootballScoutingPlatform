@@ -2,6 +2,7 @@ package com.scouting.desktopgui.model;
 
 public class ScoutReport {
     private String id;
+    private String playerId;
     private String playerName;
     private String position;
     private int potentialScore;
@@ -9,6 +10,10 @@ public class ScoutReport {
 
     public String getId() {
         return id;
+    }
+
+    public String getPlayerId() {
+        return playerId;
     }
 
     public String getPlayerName() {

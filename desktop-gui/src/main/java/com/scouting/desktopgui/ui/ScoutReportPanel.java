@@ -1,9 +1,11 @@
 package com.scouting.desktopgui.ui;
 
 import com.scouting.desktopgui.client.ScoutingApiClient;
+import com.scouting.desktopgui.model.Player;
 import com.scouting.desktopgui.model.ScoutReport;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -15,12 +17,14 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.util.List;
+import java.util.Objects;
 
 public class ScoutReportPanel extends JPanel {
     private final ScoutingApiClient client;
     private final DefaultTableModel tableModel;
     private final JTable table;
     private final JTextField idField;
+    private final JComboBox<PlayerChoice> playerCombo;
     private final JTextField playerNameField;
     private final JTextField positionField;
     private final JTextField potentialScoreField;
@@ -31,7 +35,7 @@ public class ScoutReportPanel extends JPanel {
         this.client = client;
         this.setLayout(new BorderLayout());
 
-        this.tableModel = new DefaultTableModel(new String[]{"ID", "Player", "Position", "Potential", "Notes"}, 0) {
+        this.tableModel = new DefaultTableModel(new String[]{"ID", "PlayerId", "Player", "Position", "Potential", "Notes"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -40,9 +44,10 @@ public class ScoutReportPanel extends JPanel {
         this.table = new JTable(tableModel);
         this.table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        JPanel form = new JPanel(new GridLayout(6, 2, 8, 8));
+        JPanel form = new JPanel(new GridLayout(7, 2, 8, 8));
         idField = new JTextField();
         idField.setEditable(false);
+        playerCombo = new JComboBox<>();
         playerNameField = new JTextField();
         positionField = new JTextField();
         potentialScoreField = new JTextField();
@@ -50,6 +55,8 @@ public class ScoutReportPanel extends JPanel {
 
         form.add(new JLabel("ID (update/delete):"));
         form.add(idField);
+        form.add(new JLabel("Oyuncu (playerId):"));
+        form.add(playerCombo);
         form.add(new JLabel("Player Name:"));
         form.add(playerNameField);
         form.add(new JLabel("Position:"));
@@ -82,14 +89,53 @@ public class ScoutReportPanel extends JPanel {
         add(new JScrollPane(table), BorderLayout.CENTER);
         add(south, BorderLayout.SOUTH);
 
-        refreshButton.addActionListener(e -> refreshReports(false));
+        refreshButton.addActionListener(e -> {
+            reloadPlayerCombo();
+            refreshReports(false);
+        });
         createButton.addActionListener(e -> createReport());
         updateButton.addActionListener(e -> updateReport());
         deleteButton.addActionListener(e -> deleteReport());
         clearButton.addActionListener(e -> clearForm());
         table.getSelectionModel().addListSelectionListener(e -> fillFormFromSelection());
 
+        reloadPlayerCombo();
         refreshReports(true);
+    }
+
+    private void reloadPlayerCombo() {
+        try {
+            String previousId = selectedPlayerId();
+            playerCombo.removeAllItems();
+            playerCombo.addItem(new PlayerChoice(null, "-- Oyuncu secmeden (playerId yok) --"));
+            for (Player player : client.getPlayers()) {
+                String label = player.getName() + " (" + player.getPosition() + ", id: " + player.getId() + ")";
+                playerCombo.addItem(new PlayerChoice(player.getId(), label));
+            }
+            selectPlayerInCombo(previousId);
+        } catch (Exception ex) {
+            statusLabel.setText("Oyuncu listesi yuklenemedi: " + ex.getMessage());
+        }
+    }
+
+    private String selectedPlayerId() {
+        PlayerChoice choice = (PlayerChoice) playerCombo.getSelectedItem();
+        return choice == null ? null : choice.playerId;
+    }
+
+    private void selectPlayerInCombo(String playerId) {
+        if (playerId == null || playerId.isBlank()) {
+            playerCombo.setSelectedIndex(0);
+            return;
+        }
+        for (int i = 0; i < playerCombo.getItemCount(); i++) {
+            PlayerChoice c = playerCombo.getItemAt(i);
+            if (c != null && Objects.equals(playerId, c.playerId)) {
+                playerCombo.setSelectedIndex(i);
+                return;
+            }
+        }
+        playerCombo.setSelectedIndex(0);
     }
 
     private void refreshReports(boolean silentError) {
@@ -99,6 +145,7 @@ public class ScoutReportPanel extends JPanel {
             for (ScoutReport report : reports) {
                 tableModel.addRow(new Object[]{
                         report.getId(),
+                        report.getPlayerId() != null ? report.getPlayerId() : "",
                         report.getPlayerName(),
                         report.getPosition(),
                         report.getPotentialScore(),
@@ -117,6 +164,7 @@ public class ScoutReportPanel extends JPanel {
     private void createReport() {
         try {
             client.createScoutReport(
+                    selectedPlayerId(),
                     playerNameField.getText().trim(),
                     positionField.getText().trim(),
                     Integer.parseInt(potentialScoreField.getText().trim()),
@@ -134,6 +182,7 @@ public class ScoutReportPanel extends JPanel {
         try {
             client.updateScoutReport(
                     idField.getText().trim(),
+                    selectedPlayerId(),
                     playerNameField.getText().trim(),
                     positionField.getText().trim(),
                     Integer.parseInt(potentialScoreField.getText().trim()),
@@ -163,15 +212,18 @@ public class ScoutReportPanel extends JPanel {
             return;
         }
         idField.setText(String.valueOf(tableModel.getValueAt(row, 0)));
-        playerNameField.setText(String.valueOf(tableModel.getValueAt(row, 1)));
-        positionField.setText(String.valueOf(tableModel.getValueAt(row, 2)));
-        potentialScoreField.setText(String.valueOf(tableModel.getValueAt(row, 3)));
-        notesField.setText(String.valueOf(tableModel.getValueAt(row, 4)));
+        String pid = String.valueOf(tableModel.getValueAt(row, 1));
+        selectPlayerInCombo("".equals(pid) || "null".equalsIgnoreCase(pid) ? null : pid);
+        playerNameField.setText(String.valueOf(tableModel.getValueAt(row, 2)));
+        positionField.setText(String.valueOf(tableModel.getValueAt(row, 3)));
+        potentialScoreField.setText(String.valueOf(tableModel.getValueAt(row, 4)));
+        notesField.setText(String.valueOf(tableModel.getValueAt(row, 5)));
         statusLabel.setText("Secilen rapor ID: " + idField.getText());
     }
 
     private void clearForm() {
         idField.setText("");
+        playerCombo.setSelectedIndex(0);
         playerNameField.setText("");
         positionField.setText("");
         potentialScoreField.setText("");
@@ -181,5 +233,20 @@ public class ScoutReportPanel extends JPanel {
 
     private void showError(Exception ex) {
         JOptionPane.showMessageDialog(this, ex.getMessage(), "Hata", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private static final class PlayerChoice {
+        private final String playerId;
+        private final String label;
+
+        private PlayerChoice(String playerId, String label) {
+            this.playerId = playerId;
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 }

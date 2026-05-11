@@ -2,10 +2,13 @@ package com.scouting.playerservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisRepositoriesAutoConfiguration;
 
-@SpringBootApplication(exclude = {RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class})
+@SpringBootApplication(exclude = {
+        DataRedisAutoConfiguration.class,
+        DataRedisRepositoriesAutoConfiguration.class
+})
 public class PlayerServiceApplication {
 
     public static void main(String[] args) {

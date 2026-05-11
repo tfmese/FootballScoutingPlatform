@@ -21,7 +21,6 @@ public class PlayerListCacheConfiguration {
         standalone.setHostName(props.getHost());
         standalone.setPort(props.getPort());
         LettuceConnectionFactory factory = new LettuceConnectionFactory(standalone);
-        factory.afterPropertiesSet();
         return factory;
     }
 

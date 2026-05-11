@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/scouts")
@@ -30,7 +31,7 @@ public class ScoutReportController {
     @PostMapping
     public ResponseEntity<ApiResponse<ScoutReport>> create(@Valid @RequestBody CreateScoutReportRequest request) {
         ScoutReport created = service.create(
-                request.playerId(),
+                parsePlayerId(request.playerId()),
                 request.playerName(),
                 request.position(),
                 request.potentialScore(),
@@ -57,7 +58,7 @@ public class ScoutReportController {
     ) {
         ScoutReport updated = service.update(
                 id,
-                request.playerId(),
+                parsePlayerId(request.playerId()),
                 request.playerName(),
                 request.position(),
                 request.potentialScore(),
@@ -70,5 +71,12 @@ public class ScoutReportController {
     public ResponseEntity<Void> delete(@PathVariable String id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private static UUID parsePlayerId(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        return UUID.fromString(raw);
     }
 }

@@ -3,11 +3,14 @@ package com.scouting.scoutingservice.interfaces;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-
-import java.util.UUID;
+import jakarta.validation.constraints.Pattern;
 
 public record CreateScoutReportRequest(
-        UUID playerId,
+        @Pattern(
+                regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                message = "playerId must be a valid UUID when provided"
+        )
+        String playerId,
         @NotBlank(message = "playerName is required")
         String playerName,
         @NotBlank(message = "position is required")

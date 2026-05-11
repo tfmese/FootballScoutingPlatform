@@ -32,3 +32,16 @@ services:
       timeout: 5s
       retries: 10
       start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: scouting_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s

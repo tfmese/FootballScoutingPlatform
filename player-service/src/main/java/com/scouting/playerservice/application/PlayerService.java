@@ -1,5 +1,6 @@
 package com.scouting.playerservice.application;
 
+import com.scouting.playerservice.application.port.PlayerListCachePort;
 import com.scouting.playerservice.domain.Player;
 import com.scouting.playerservice.domain.PlayerNotFoundException;
 import com.scouting.playerservice.domain.PlayerRepository;
@@ -12,13 +13,17 @@ import java.util.UUID;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+    private final PlayerListCachePort playerListCache;
 
-    public PlayerService(PlayerRepository playerRepository) {
+    public PlayerService(PlayerRepository playerRepository, PlayerListCachePort playerListCache) {
         this.playerRepository = playerRepository;
+        this.playerListCache = playerListCache;
     }
 
     public Player createPlayer(String name, String position, int age) {
-        return playerRepository.save(newPlayer(name, position, age));
+        Player created = playerRepository.save(newPlayer(name, position, age));
+        playerListCache.evictCachedPlayerList();
+        return created;
     }
 
     public Player getPlayerById(UUID playerId) {
@@ -27,18 +32,25 @@ public class PlayerService {
     }
 
     public List<Player> getAllPlayers() {
-        return playerRepository.findAll();
+        return playerListCache.getCachedPlayerList().orElseGet(() -> {
+            List<Player> all = playerRepository.findAll();
+            playerListCache.putCachedPlayerList(all);
+            return all;
+        });
     }
 
     public Player updatePlayer(UUID playerId, String name, String position, int age) {
         Player existing = getPlayerById(playerId);
         existing.update(name, position, age);
-        return playerRepository.save(existing);
+        Player saved = playerRepository.save(existing);
+        playerListCache.evictCachedPlayerList();
+        return saved;
     }
 
     public void deletePlayer(UUID playerId) {
         Player existing = getPlayerById(playerId);
         playerRepository.deleteById(existing.getId());
+        playerListCache.evictCachedPlayerList();
     }
 
     private Player newPlayer(String name, String position, int age) {

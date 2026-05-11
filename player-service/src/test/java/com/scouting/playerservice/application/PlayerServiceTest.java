@@ -3,6 +3,7 @@ package com.scouting.playerservice.application;
 import com.scouting.playerservice.domain.Player;
 import com.scouting.playerservice.domain.PlayerRepository;
 import com.scouting.playerservice.domain.PlayerNotFoundException;
+import com.scouting.playerservice.infrastructure.cache.NoOpPlayerListCacheAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +24,7 @@ class PlayerServiceTest {
 
     @BeforeEach
     void setUp() {
-        playerService = new PlayerService(new InMemoryRepositoryStub());
+        playerService = new PlayerService(new InMemoryRepositoryStub(), new NoOpPlayerListCacheAdapter());
     }
 
     @Test

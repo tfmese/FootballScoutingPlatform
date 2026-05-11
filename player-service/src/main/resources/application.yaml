@@ -19,3 +19,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+# Redis önbelleği: docker-compose ile redis ayağa kalkınca PLAYER_CACHE_REDIS_ENABLED=true verin.
+player:
+  cache:
+    redis:
+      enabled: ${PLAYER_CACHE_REDIS_ENABLED:false}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      ttl-seconds: ${PLAYER_LIST_CACHE_TTL_SECONDS:60}

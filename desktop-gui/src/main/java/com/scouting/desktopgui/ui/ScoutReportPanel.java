@@ -62,7 +62,10 @@ public class ScoutReportPanel extends JPanel {
         form.add(new JLabel("Position:"));
         form.add(positionField);
         form.add(new JLabel("Potential Score:"));
-        form.add(potentialScoreField);
+        JPanel potentialRow = new JPanel(new BorderLayout(8, 0));
+        potentialRow.add(potentialScoreField, BorderLayout.CENTER);
+        potentialRow.add(new PotentialScoreBarPanel(potentialScoreField), BorderLayout.EAST);
+        form.add(potentialRow);
         form.add(new JLabel("Notes:"));
         form.add(notesField);
 

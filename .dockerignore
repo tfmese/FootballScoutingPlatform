@@ -1,0 +1,8 @@
+**/.git
+**/.idea
+**/.cursor
+**/target
+**/*.iml
+**/mvnw
+**/mvnw.cmd
+**/.mvn/wrapper/maven-wrapper.jar

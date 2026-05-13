@@ -1,4 +1,7 @@
 
+# Veritabanı + Redis: docker compose up -d
+# API'ler (player-service, scouting-service, api-gateway): docker compose --profile app up -d --build
+
 services:
   postgres-db:
     image: postgres:15
@@ -45,3 +48,60 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5s
+
+  player-service:
+    profiles:
+      - app
+    build:
+      context: .
+      dockerfile: player-service/Dockerfile
+    container_name: scouting_player_service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/player_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+      REDIS_HOST: redis
+      PLAYER_CACHE_REDIS_ENABLED: "true"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scouting-service:
+    profiles:
+      - app
+    build:
+      context: .
+      dockerfile: scouting-service/Dockerfile
+    container_name: scouting_scouting_service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:password@mongo-db:27017/scouting_db?authSource=admin
+    depends_on:
+      mongo-db:
+        condition: service_healthy
+
+  api-gateway:
+    profiles:
+      - app
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: scouting_api_gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PLAYER_SERVICE_URL: http://player-service:8081
+      SCOUTING_SERVICE_URL: http://scouting-service:8082
+    depends_on:
+      player-service:
+        condition: service_started
+      scouting-service:
+        condition: service_started

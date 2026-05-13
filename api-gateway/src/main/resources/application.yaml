@@ -1,6 +1,11 @@
 server:
   port: 8080
 
+# Örnek: GATEWAY_CORS_ORIGIN_PATTERNS=http://localhost:*,https://ornek.com
+gateway:
+  cors:
+    allowed-origin-patterns: ${GATEWAY_CORS_ORIGIN_PATTERNS:*}
+
 spring:
   application:
     name: api-gateway
@@ -9,14 +14,14 @@ spring:
     gateway:
       routes:
         - id: player-service-route
-          uri: http://localhost:8081
+          uri: ${PLAYER_SERVICE_URL:http://localhost:8081}
           predicates:
             - Path=/api/players,/api/players/**
           filters:
             - StripPrefix=1
 
         - id: scouting-service-route
-          uri: http://localhost:8082
+          uri: ${SCOUTING_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/api/scouts,/api/scouts/**
           filters:

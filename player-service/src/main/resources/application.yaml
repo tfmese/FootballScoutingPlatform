@@ -6,9 +6,9 @@ spring:
     name: player-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/player_db
-    username: root
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/player_db}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
 
   jpa:

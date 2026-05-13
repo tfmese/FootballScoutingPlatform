@@ -1,6 +1,7 @@
 package com.scouting.playerservice.application;
 
 import com.scouting.playerservice.application.port.PlayerListCachePort;
+import com.scouting.playerservice.application.port.PlayerJdbcQueryPort;
 import com.scouting.playerservice.domain.Player;
 import com.scouting.playerservice.domain.PlayerNotFoundException;
 import com.scouting.playerservice.domain.PlayerRepository;
@@ -14,14 +15,20 @@ public class PlayerService {
 
     private final PlayerRepository playerRepository;
     private final PlayerListCachePort playerListCache;
+    private final PlayerJdbcQueryPort playerJdbcQuery;
 
-    public PlayerService(PlayerRepository playerRepository, PlayerListCachePort playerListCache) {
+    public PlayerService(
+            PlayerRepository playerRepository,
+            PlayerListCachePort playerListCache,
+            PlayerJdbcQueryPort playerJdbcQuery
+    ) {
         this.playerRepository = playerRepository;
         this.playerListCache = playerListCache;
+        this.playerJdbcQuery = playerJdbcQuery;
     }
 
-    public Player createPlayer(String name, String position, int age) {
-        Player created = playerRepository.save(newPlayer(name, position, age));
+    public Player createPlayer(String name, String position, int age, String club, String preferredFoot) {
+        Player created = playerRepository.save(newPlayer(name, position, age, club, preferredFoot));
         playerListCache.evictCachedPlayerList();
         return created;
     }
@@ -39,9 +46,13 @@ public class PlayerService {
         });
     }
 
-    public Player updatePlayer(UUID playerId, String name, String position, int age) {
+    public List<Player> getAllPlayersViaJdbc() {
+        return playerJdbcQuery.findAllPlayers();
+    }
+
+    public Player updatePlayer(UUID playerId, String name, String position, int age, String club, String preferredFoot) {
         Player existing = getPlayerById(playerId);
-        existing.update(name, position, age);
+        existing.update(name, position, age, club, preferredFoot);
         Player saved = playerRepository.save(existing);
         playerListCache.evictCachedPlayerList();
         return saved;
@@ -53,7 +64,7 @@ public class PlayerService {
         playerListCache.evictCachedPlayerList();
     }
 
-    private Player newPlayer(String name, String position, int age) {
-        return Player.create(name, position, age);
+    private Player newPlayer(String name, String position, int age, String club, String preferredFoot) {
+        return Player.create(name, position, age, club, preferredFoot);
     }
 }

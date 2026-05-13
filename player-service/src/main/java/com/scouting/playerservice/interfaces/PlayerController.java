@@ -29,7 +29,7 @@ public class PlayerController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Player>> createPlayer(@Valid @RequestBody CreatePlayerRequest request) {
-        Player created = playerService.createPlayer(request.name(), request.position(), request.age());
+        Player created = playerService.createPlayer(request.name(), request.position(), request.age(), request.club(), request.preferredFoot());
         return ResponseFactory.created("Player created", created);
     }
 
@@ -45,12 +45,18 @@ public class PlayerController {
         return ResponseFactory.ok("Players retrieved", PagedResult.of(players));
     }
 
+    @GetMapping("/jdbc")
+    public ResponseEntity<ApiResponse<PagedResult<Player>>> getAllPlayersViaJdbc() {
+        List<Player> players = playerService.getAllPlayersViaJdbc();
+        return ResponseFactory.ok("Players retrieved via JDBC", PagedResult.of(players));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Player>> updatePlayer(
             @PathVariable UUID id,
             @Valid @RequestBody UpdatePlayerRequest request
     ) {
-        Player updated = playerService.updatePlayer(id, request.name(), request.position(), request.age());
+        Player updated = playerService.updatePlayer(id, request.name(), request.position(), request.age(), request.club(), request.preferredFoot());
         return ResponseFactory.ok("Player updated", updated);
     }
 

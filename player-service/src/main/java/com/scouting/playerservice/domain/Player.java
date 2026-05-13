@@ -22,24 +22,35 @@ public class Player {
     @Column(nullable = false)
     private int age;
 
+    @Column(length = 120)
+    private String club;
+
+    // Keep the column backward-compatible with existing rows while the data is backfilled.
+    @Column(name = "preferred_foot", length = 16)
+    private String preferredFoot;
+
     protected Player() {
     }
 
-    public Player(UUID id, String name, String position, int age) {
+    public Player(UUID id, String name, String position, int age, String club, String preferredFoot) {
         this.id = id;
         this.name = name;
         this.position = position;
         this.age = age;
+        this.club = normalizeClub(club);
+        this.preferredFoot = normalizePreferredFoot(preferredFoot);
     }
 
-    public static Player create(String name, String position, int age) {
-        return new Player(UUID.randomUUID(), name, position, age);
+    public static Player create(String name, String position, int age, String club, String preferredFoot) {
+        return new Player(UUID.randomUUID(), name, position, age, club, preferredFoot);
     }
 
-    public void update(String name, String position, int age) {
+    public void update(String name, String position, int age, String club, String preferredFoot) {
         this.name = name;
         this.position = position;
         this.age = age;
+        this.club = normalizeClub(club);
+        this.preferredFoot = normalizePreferredFoot(preferredFoot);
     }
 
     public UUID getId() {
@@ -56,5 +67,27 @@ public class Player {
 
     public int getAge() {
         return age;
+    }
+
+    public String getClub() {
+        return normalizeClub(club);
+    }
+
+    public String getPreferredFoot() {
+        return normalizePreferredFoot(preferredFoot);
+    }
+
+    private static String normalizeClub(String club) {
+        if (club == null) {
+            return "";
+        }
+        return club.trim();
+    }
+
+    private static String normalizePreferredFoot(String preferredFoot) {
+        if (preferredFoot == null || preferredFoot.isBlank()) {
+            return "Right";
+        }
+        return preferredFoot.trim();
     }
 }

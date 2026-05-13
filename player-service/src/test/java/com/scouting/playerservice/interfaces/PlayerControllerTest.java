@@ -9,11 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -42,12 +41,12 @@ class PlayerControllerTest {
 
     @Test
     void postPlayersShouldReturnCreated() throws Exception {
-        Player player = new Player(UUID.randomUUID(), "Amir Murillo", "RB", 30);
-        when(playerService.createPlayer(anyString(), anyString(), anyInt())).thenReturn(player);
+        Player player = new Player(UUID.randomUUID(), "Amir Murillo", "RB", 30, "Marseille", "Right");
+        when(playerService.createPlayer(anyString(), anyString(), anyInt(), anyString(), anyString())).thenReturn(player);
 
         mockMvc.perform(post("/players")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Amir Murillo\",\"position\":\"RB\",\"age\":30}"))
+                        .content("{\"name\":\"Amir Murillo\",\"position\":\"RB\",\"age\":30,\"club\":\"Marseille\",\"preferredFoot\":\"Right\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.name").value("Amir Murillo"));
     }
@@ -55,7 +54,7 @@ class PlayerControllerTest {
     @Test
     void getPlayerByIdWhenExistsShouldReturnOk() throws Exception {
         UUID playerId = UUID.randomUUID();
-        Player player = new Player(playerId, "Emmanuel Agbadou", "CB", 28);
+        Player player = new Player(playerId, "Emmanuel Agbadou", "CB", 28, "Wolves", "Right");
         when(playerService.getPlayerById(eq(playerId))).thenReturn(player);
 
         mockMvc.perform(get("/players/{id}", playerId))
@@ -82,8 +81,8 @@ class PlayerControllerTest {
 
     @Test
     void getPlayersShouldReturnAllPlayers() throws Exception {
-        Player first = new Player(UUID.randomUUID(), "A", "CB", 24);
-        Player second = new Player(UUID.randomUUID(), "B", "RB", 25);
+        Player first = new Player(UUID.randomUUID(), "A", "CB", 24, "Club A", "Left");
+        Player second = new Player(UUID.randomUUID(), "B", "RB", 25, "Club B", "Right");
         when(playerService.getAllPlayers()).thenReturn(List.of(first, second));
 
         mockMvc.perform(get("/players"))
@@ -92,14 +91,26 @@ class PlayerControllerTest {
     }
 
     @Test
+    void getPlayersViaJdbcShouldReturnAllPlayers() throws Exception {
+        Player first = new Player(UUID.randomUUID(), "A", "CB", 24, "Club A", "Left");
+        Player second = new Player(UUID.randomUUID(), "B", "RB", 25, "Club B", "Right");
+        when(playerService.getAllPlayersViaJdbc()).thenReturn(List.of(first, second));
+
+        mockMvc.perform(get("/players/jdbc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Players retrieved via JDBC"))
+                .andExpect(jsonPath("$.data.items.length()").value(2));
+    }
+
+    @Test
     void putPlayerShouldReturnOk() throws Exception {
         UUID playerId = UUID.randomUUID();
-        Player updated = new Player(playerId, "Updated", "CM", 27);
-        when(playerService.updatePlayer(eq(playerId), anyString(), anyString(), anyInt())).thenReturn(updated);
+        Player updated = new Player(playerId, "Updated", "CM", 27, "Updated FC", "Both");
+        when(playerService.updatePlayer(eq(playerId), anyString(), anyString(), anyInt(), anyString(), anyString())).thenReturn(updated);
 
         mockMvc.perform(put("/players/{id}", playerId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Updated\",\"position\":\"CM\",\"age\":27}"))
+                        .content("{\"name\":\"Updated\",\"position\":\"CM\",\"age\":27,\"club\":\"Updated FC\",\"preferredFoot\":\"Both\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("Updated"));
     }
@@ -117,7 +128,7 @@ class PlayerControllerTest {
     void postPlayersWithInvalidBodyShouldReturnBadRequest() throws Exception {
         mockMvc.perform(post("/players")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"position\":\"RB\",\"age\":10}"))
+                        .content("{\"name\":\"\",\"position\":\"RB\",\"age\":10,\"club\":\"\",\"preferredFoot\":\"\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").exists());
     }

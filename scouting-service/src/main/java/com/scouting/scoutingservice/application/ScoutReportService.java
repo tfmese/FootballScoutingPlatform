@@ -18,7 +18,13 @@ public class ScoutReportService {
     }
 
     public ScoutReport create(UUID playerId, String playerName, String position, int potentialScore, String notes) {
-        return repository.save(ScoutReport.create(playerId, playerName, position, potentialScore, notes));
+        return repository.save(ScoutReport.builder()
+                .playerId(playerId)
+                .playerName(playerName)
+                .position(position)
+                .potentialScore(potentialScore)
+                .notes(notes)
+                .build());
     }
 
     public ScoutReport getById(String id) {

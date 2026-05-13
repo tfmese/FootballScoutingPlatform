@@ -41,19 +41,23 @@ public class ScoutingApiClient {
         });
     }
 
-    public void createPlayer(String name, String position, int age) throws IOException, InterruptedException {
+    public void createPlayer(String name, String position, int age, String club, String preferredFoot) throws IOException, InterruptedException {
         sendWrite(resolvePlayersUrl(""), "POST", Map.of(
                 "name", name,
                 "position", position,
-                "age", age
+                "age", age,
+                "club", club,
+                "preferredFoot", preferredFoot
         ));
     }
 
-    public void updatePlayer(String id, String name, String position, int age) throws IOException, InterruptedException {
+    public void updatePlayer(String id, String name, String position, int age, String club, String preferredFoot) throws IOException, InterruptedException {
         sendWrite(resolvePlayersUrl("/" + id), "PUT", Map.of(
                 "name", name,
                 "position", position,
-                "age", age
+                "age", age,
+                "club", club,
+                "preferredFoot", preferredFoot
         ));
     }
 
@@ -70,26 +74,63 @@ public class ScoutingApiClient {
         });
     }
 
-    public void createScoutReport(String playerId, String playerName, String position, int potentialScore, String notes) throws IOException, InterruptedException {
+    public void createScoutReport(
+            String playerId,
+            String playerName,
+            String position,
+            int playerAge,
+            int technicalScore,
+            int physicalScore,
+            int tacticalScore,
+            int mentalScore,
+            long expectedFee,
+            String recommendation,
+            String notes
+    ) throws IOException, InterruptedException {
         Map<String, Object> body = new LinkedHashMap<>();
         if (playerId != null && !playerId.isBlank()) {
             body.put("playerId", playerId);
         }
         body.put("playerName", playerName);
         body.put("position", position);
-        body.put("potentialScore", potentialScore);
+        body.put("playerAge", playerAge);
+        body.put("technicalScore", technicalScore);
+        body.put("physicalScore", physicalScore);
+        body.put("tacticalScore", tacticalScore);
+        body.put("mentalScore", mentalScore);
+        body.put("expectedFee", expectedFee);
+        body.put("recommendation", recommendation);
         body.put("notes", notes);
         sendWrite(resolveScoutsUrl(""), "POST", body);
     }
 
-    public void updateScoutReport(String id, String playerId, String playerName, String position, int potentialScore, String notes) throws IOException, InterruptedException {
+    public void updateScoutReport(
+            String id,
+            String playerId,
+            String playerName,
+            String position,
+            int playerAge,
+            int technicalScore,
+            int physicalScore,
+            int tacticalScore,
+            int mentalScore,
+            long expectedFee,
+            String recommendation,
+            String notes
+    ) throws IOException, InterruptedException {
         Map<String, Object> body = new LinkedHashMap<>();
         if (playerId != null && !playerId.isBlank()) {
             body.put("playerId", playerId);
         }
         body.put("playerName", playerName);
         body.put("position", position);
-        body.put("potentialScore", potentialScore);
+        body.put("playerAge", playerAge);
+        body.put("technicalScore", technicalScore);
+        body.put("physicalScore", physicalScore);
+        body.put("tacticalScore", tacticalScore);
+        body.put("mentalScore", mentalScore);
+        body.put("expectedFee", expectedFee);
+        body.put("recommendation", recommendation);
         body.put("notes", notes);
         sendWrite(resolveScoutsUrl("/" + id), "PUT", body);
     }

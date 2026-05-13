@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/scouts")
 public class ScoutReportController {
@@ -31,10 +29,16 @@ public class ScoutReportController {
     @PostMapping
     public ResponseEntity<ApiResponse<ScoutReport>> create(@Valid @RequestBody CreateScoutReportRequest request) {
         ScoutReport created = service.create(
-                parsePlayerId(request.playerId()),
+                normalizePlayerId(request.playerId()),
                 request.playerName(),
                 request.position(),
-                request.potentialScore(),
+                request.playerAge(),
+                request.technicalScore(),
+                request.physicalScore(),
+                request.tacticalScore(),
+                request.mentalScore(),
+                request.expectedFee(),
+                request.recommendation(),
                 request.notes()
         );
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -58,10 +62,16 @@ public class ScoutReportController {
     ) {
         ScoutReport updated = service.update(
                 id,
-                parsePlayerId(request.playerId()),
+                normalizePlayerId(request.playerId()),
                 request.playerName(),
                 request.position(),
-                request.potentialScore(),
+                request.playerAge(),
+                request.technicalScore(),
+                request.physicalScore(),
+                request.tacticalScore(),
+                request.mentalScore(),
+                request.expectedFee(),
+                request.recommendation(),
                 request.notes()
         );
         return ResponseEntity.ok(new ApiResponse<>("Scout report updated", updated));
@@ -73,10 +83,10 @@ public class ScoutReportController {
         return ResponseEntity.noContent().build();
     }
 
-    private static UUID parsePlayerId(String raw) {
+    private static String normalizePlayerId(String raw) {
         if (raw == null || raw.isBlank()) {
             return null;
         }
-        return UUID.fromString(raw);
+        return raw;
     }
 }

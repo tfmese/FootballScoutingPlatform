@@ -6,8 +6,6 @@ import com.scouting.scoutingservice.domain.ScoutReportRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
-
 @Service
 public class ScoutReportService {
 
@@ -17,12 +15,32 @@ public class ScoutReportService {
         this.repository = repository;
     }
 
-    public ScoutReport create(UUID playerId, String playerName, String position, int potentialScore, String notes) {
+    public ScoutReport create(
+            String playerId,
+            String playerName,
+            String position,
+            int playerAge,
+            int technicalScore,
+            int physicalScore,
+            int tacticalScore,
+            int mentalScore,
+            long expectedFee,
+            String recommendation,
+            String notes
+    ) {
+        int potentialScore = calculatePotentialScore(technicalScore, physicalScore, tacticalScore, mentalScore);
         return repository.save(ScoutReport.builder()
                 .playerId(playerId)
                 .playerName(playerName)
                 .position(position)
+                .playerAge(playerAge)
+                .technicalScore(technicalScore)
+                .physicalScore(physicalScore)
+                .tacticalScore(tacticalScore)
+                .mentalScore(mentalScore)
                 .potentialScore(potentialScore)
+                .expectedFee(expectedFee)
+                .recommendation(recommendation)
                 .notes(notes)
                 .build());
     }
@@ -36,14 +54,45 @@ public class ScoutReportService {
         return repository.findAll();
     }
 
-    public ScoutReport update(String id, UUID playerId, String playerName, String position, int potentialScore, String notes) {
+    public ScoutReport update(
+            String id,
+            String playerId,
+            String playerName,
+            String position,
+            int playerAge,
+            int technicalScore,
+            int physicalScore,
+            int tacticalScore,
+            int mentalScore,
+            long expectedFee,
+            String recommendation,
+            String notes
+    ) {
         ScoutReport report = getById(id);
-        report.update(playerId, playerName, position, potentialScore, notes);
+        int potentialScore = calculatePotentialScore(technicalScore, physicalScore, tacticalScore, mentalScore);
+        report.update(
+                playerId,
+                playerName,
+                position,
+                playerAge,
+                technicalScore,
+                physicalScore,
+                tacticalScore,
+                mentalScore,
+                potentialScore,
+                expectedFee,
+                recommendation,
+                notes
+        );
         return repository.save(report);
     }
 
     public void delete(String id) {
         getById(id);
         repository.deleteById(id);
+    }
+
+    private int calculatePotentialScore(int technicalScore, int physicalScore, int tacticalScore, int mentalScore) {
+        return Math.round((technicalScore + physicalScore + tacticalScore + mentalScore) / 4.0f);
     }
 }

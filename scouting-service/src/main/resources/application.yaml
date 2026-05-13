@@ -5,6 +5,5 @@ spring:
   application:
     name: scouting-service
 
-  data:
-    mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI:mongodb://root:password@localhost:27017/scouting_db?authSource=admin}
+  mongodb:
+    uri: ${SPRING_MONGODB_URI:mongodb://root:password@localhost:27017/scouting_db?authSource=admin}

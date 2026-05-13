@@ -15,9 +15,25 @@ public record UpdateScoutReportRequest(
         String playerName,
         @NotBlank(message = "position is required")
         String position,
-        @Min(value = 1, message = "potentialScore must be at least 1")
-        @Max(value = 100, message = "potentialScore must be at most 100")
-        int potentialScore,
+        @Min(value = 15, message = "playerAge must be at least 15")
+        @Max(value = 50, message = "playerAge must be at most 50")
+        int playerAge,
+        @Min(value = 1, message = "technicalScore must be at least 1")
+        @Max(value = 100, message = "technicalScore must be at most 100")
+        int technicalScore,
+        @Min(value = 1, message = "physicalScore must be at least 1")
+        @Max(value = 100, message = "physicalScore must be at most 100")
+        int physicalScore,
+        @Min(value = 1, message = "tacticalScore must be at least 1")
+        @Max(value = 100, message = "tacticalScore must be at most 100")
+        int tacticalScore,
+        @Min(value = 1, message = "mentalScore must be at least 1")
+        @Max(value = 100, message = "mentalScore must be at most 100")
+        int mentalScore,
+        @Min(value = 0, message = "expectedFee must be at least 0")
+        long expectedFee,
+        @NotBlank(message = "recommendation is required")
+        String recommendation,
         @NotBlank(message = "notes is required")
         String notes
 ) {

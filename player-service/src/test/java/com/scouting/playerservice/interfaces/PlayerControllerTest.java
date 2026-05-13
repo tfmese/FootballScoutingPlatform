@@ -64,6 +64,13 @@ class PlayerControllerTest {
     }
 
     @Test
+    void getPlayerByIdWithInvalidUuidPathShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(get("/players/{id}", "not-a-uuid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Geçersiz yol parametresi: id"));
+    }
+
+    @Test
     void getPlayerByIdWhenNotFoundShouldReturn404() throws Exception {
         UUID playerId = UUID.randomUUID();
         when(playerService.getPlayerById(eq(playerId))).thenThrow(new PlayerNotFoundException(playerId));

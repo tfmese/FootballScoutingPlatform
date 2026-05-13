@@ -11,7 +11,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 /**
- * PDF Custom GUI: standart bileşenlerin dışında {@link #paintComponent(Graphics)} ile çizilen skor çubuğu.
+ * Swing: standart bileşenlerin dışında {@link #paintComponent(Graphics)} ile çizilen potansiyel skor çubuğu (TBL324 özel grafik).
  */
 public class PotentialScoreBarPanel extends JPanel {
 

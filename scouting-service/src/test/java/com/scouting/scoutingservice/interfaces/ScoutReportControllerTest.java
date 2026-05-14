@@ -1,5 +1,7 @@
 package com.scouting.scoutingservice.interfaces;
 
+import com.scouting.scoutingservice.application.LinkedPlayerNotFoundException;
+import com.scouting.scoutingservice.application.PlayerLookupFailedException;
 import com.scouting.scoutingservice.application.ScoutReportService;
 import com.scouting.scoutingservice.domain.ScoutReport;
 import com.scouting.scoutingservice.domain.ScoutReportNotFoundException;
@@ -133,5 +135,31 @@ class ScoutReportControllerTest {
                         .content("{\"playerName\":\"Legacy\",\"position\":\"ST\",\"playerAge\":21,\"technicalScore\":70,\"physicalScore\":68,\"tacticalScore\":66,\"mentalScore\":76,\"expectedFee\":3000000,\"recommendation\":\"Monitor\",\"notes\":\"no player link\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.playerName").value("Legacy"));
+    }
+
+    @Test
+    void postScoutsWithUnknownLinkedPlayerShouldReturn404() throws Exception {
+        String playerId = "4d6e5ef7-f545-4b72-a0f8-c4b2f66d83f0";
+        when(service.create(eq(playerId), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyString(), anyString()))
+                .thenThrow(new LinkedPlayerNotFoundException(playerId));
+
+        mockMvc.perform(post("/scouts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"playerId\":\"" + playerId + "\",\"playerName\":\"Arda Guler\",\"position\":\"AM\",\"playerAge\":20,\"technicalScore\":92,\"physicalScore\":74,\"tacticalScore\":88,\"mentalScore\":86,\"expectedFee\":25000000,\"recommendation\":\"Sign\",\"notes\":\"Top talent\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Linked player not found: " + playerId));
+    }
+
+    @Test
+    void postScoutsWhenPlayerLookupFailsShouldReturn502() throws Exception {
+        String playerId = "4d6e5ef7-f545-4b72-a0f8-c4b2f66d83f0";
+        when(service.create(eq(playerId), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyString(), anyString()))
+                .thenThrow(new PlayerLookupFailedException("boom"));
+
+        mockMvc.perform(post("/scouts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"playerId\":\"" + playerId + "\",\"playerName\":\"Arda Guler\",\"position\":\"AM\",\"playerAge\":20,\"technicalScore\":92,\"physicalScore\":74,\"tacticalScore\":88,\"mentalScore\":86,\"expectedFee\":25000000,\"recommendation\":\"Sign\",\"notes\":\"Top talent\"}"))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.message").value("Player service integration failed"));
     }
 }

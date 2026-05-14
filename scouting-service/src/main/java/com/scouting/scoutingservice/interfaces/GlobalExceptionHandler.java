@@ -1,5 +1,7 @@
 package com.scouting.scoutingservice.interfaces;
 
+import com.scouting.scoutingservice.application.LinkedPlayerNotFoundException;
+import com.scouting.scoutingservice.application.PlayerLookupFailedException;
 import com.scouting.scoutingservice.domain.ScoutReportNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ScoutReportNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(ScoutReportNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(LinkedPlayerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLinkedPlayerNotFound(LinkedPlayerNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(ex.getMessage()));
     }
@@ -38,6 +46,12 @@ public class GlobalExceptionHandler {
                 ? "playerId geçerli bir UUID olmalıdır veya alan gönderilmemelidir"
                 : "Geçersiz istek gövdesi veya alan biçimi";
         return ResponseEntity.badRequest().body(new ErrorResponse(message));
+    }
+
+    @ExceptionHandler(PlayerLookupFailedException.class)
+    public ResponseEntity<ErrorResponse> handlePlayerLookupFailure(PlayerLookupFailedException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(new ErrorResponse("Player service integration failed"));
     }
 
     @ExceptionHandler(Exception.class)

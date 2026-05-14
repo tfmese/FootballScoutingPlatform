@@ -83,6 +83,7 @@ services:
       - "8082:8082"
     environment:
       SPRING_MONGODB_URI: mongodb://root:password@mongo-db:27017/scouting_db?authSource=admin
+      PLAYER_SERVICE_URL: http://player-service:8081
     depends_on:
       mongo-db:
         condition: service_healthy

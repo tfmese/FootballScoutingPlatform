@@ -1,5 +1,7 @@
 package com.scouting.scoutingservice.application;
 
+import com.scouting.scoutingservice.application.port.PlayerLookupPort;
+import com.scouting.scoutingservice.application.port.PlayerSnapshot;
 import com.scouting.scoutingservice.domain.ScoutReport;
 import com.scouting.scoutingservice.domain.ScoutReportNotFoundException;
 import com.scouting.scoutingservice.domain.ScoutReportRepository;
@@ -19,15 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ScoutReportServiceTest {
 
     private ScoutReportService service;
+    private PlayerLookupStub playerLookup;
 
     @BeforeEach
     void setUp() {
-        service = new ScoutReportService(new InMemoryScoutReportRepository());
+        playerLookup = new PlayerLookupStub();
+        service = new ScoutReportService(new InMemoryScoutReportRepository(), playerLookup);
     }
 
     @Test
     void createShouldGenerateId() {
         String playerId = "4d6e5ef7-f545-4b72-a0f8-c4b2f66d83f0";
+        playerLookup.add(new PlayerSnapshot(playerId, "Arda Guler", "AM", 20));
         ScoutReport created = service.create(playerId, "Arda Guler", "AM", 20, 94, 77, 90, 88, 25000000L, "Sign", "Excellent creativity");
 
         assertNotNull(created.getId());
@@ -52,6 +57,7 @@ class ScoutReportServiceTest {
         ScoutReport created = service.create(null, "Old Name", "CM", 21, 70, 68, 69, 71, 4000000L, "Monitor", "Old");
 
         String playerId = "d2d47915-4dca-4cd3-ae14-4b346a779d9f";
+        playerLookup.add(new PlayerSnapshot(playerId, "New Name", "CDM", 22));
         ScoutReport updated = service.update(created.getId(), playerId, "New Name", "CDM", 22, 82, 79, 76, 81, 12000000L, "Sign", "Updated");
 
         assertEquals("New Name", updated.getPlayerName());
@@ -78,6 +84,37 @@ class ScoutReportServiceTest {
         List<ScoutReport> reports = service.getAll();
 
         assertEquals(2, reports.size());
+    }
+
+    @Test
+    void createWithLinkedPlayerShouldUseAuthoritativePlayerData() {
+        String playerId = "11111111-2222-3333-4444-555555555555";
+        playerLookup.add(new PlayerSnapshot(playerId, "Authoritative", "RW", 19));
+
+        ScoutReport created = service.create(playerId, "Ignored", "CM", 30, 80, 80, 80, 80, 5000000L, "Monitor", "n");
+
+        assertEquals(playerId, created.getPlayerId());
+        assertEquals("Authoritative", created.getPlayerName());
+        assertEquals("RW", created.getPosition());
+        assertEquals(19, created.getPlayerAge());
+    }
+
+    @Test
+    void createWithUnknownLinkedPlayerShouldThrowNotFound() {
+        String playerId = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+
+        assertThrows(LinkedPlayerNotFoundException.class, () ->
+                service.create(playerId, "Ignored", "CM", 20, 80, 80, 80, 80, 1L, "Monitor", "n"));
+    }
+
+    @Test
+    void createWithoutLinkedPlayerShouldKeepManualFields() {
+        ScoutReport created = service.create(null, "Manual Name", "ST", 24, 75, 76, 77, 78, 2000000L, "Monitor", "manual");
+
+        assertEquals(null, created.getPlayerId());
+        assertEquals("Manual Name", created.getPlayerName());
+        assertEquals("ST", created.getPosition());
+        assertEquals(24, created.getPlayerAge());
     }
 
     private static final class InMemoryScoutReportRepository implements ScoutReportRepository {
@@ -122,6 +159,19 @@ class ScoutReportServiceTest {
         @Override
         public void deleteById(String id) {
             storage.remove(id);
+        }
+    }
+
+    private static final class PlayerLookupStub implements PlayerLookupPort {
+        private final Map<String, PlayerSnapshot> storage = new HashMap<>();
+
+        @Override
+        public Optional<PlayerSnapshot> findById(String playerId) {
+            return Optional.ofNullable(storage.get(playerId));
+        }
+
+        private void add(PlayerSnapshot snapshot) {
+            storage.put(snapshot.id(), snapshot);
         }
     }
 }

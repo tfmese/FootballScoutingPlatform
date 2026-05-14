@@ -1,5 +1,7 @@
 package com.scouting.scoutingservice.application;
 
+import com.scouting.scoutingservice.application.port.PlayerLookupPort;
+import com.scouting.scoutingservice.application.port.PlayerSnapshot;
 import com.scouting.scoutingservice.domain.ScoutReport;
 import com.scouting.scoutingservice.domain.ScoutReportNotFoundException;
 import com.scouting.scoutingservice.domain.ScoutReportRepository;
@@ -10,9 +12,11 @@ import java.util.List;
 public class ScoutReportService {
 
     private final ScoutReportRepository repository;
+    private final PlayerLookupPort playerLookupPort;
 
-    public ScoutReportService(ScoutReportRepository repository) {
+    public ScoutReportService(ScoutReportRepository repository, PlayerLookupPort playerLookupPort) {
         this.repository = repository;
+        this.playerLookupPort = playerLookupPort;
     }
 
     public ScoutReport create(
@@ -28,12 +32,13 @@ public class ScoutReportService {
             String recommendation,
             String notes
     ) {
+        PlayerSnapshot player = resolvePlayerSnapshot(playerId, playerName, position, playerAge);
         int potentialScore = calculatePotentialScore(technicalScore, physicalScore, tacticalScore, mentalScore);
         return repository.save(ScoutReport.builder()
-                .playerId(playerId)
-                .playerName(playerName)
-                .position(position)
-                .playerAge(playerAge)
+                .playerId(player.id())
+                .playerName(player.name())
+                .position(player.position())
+                .playerAge(player.age())
                 .technicalScore(technicalScore)
                 .physicalScore(physicalScore)
                 .tacticalScore(tacticalScore)
@@ -69,12 +74,13 @@ public class ScoutReportService {
             String notes
     ) {
         ScoutReport report = getById(id);
+        PlayerSnapshot player = resolvePlayerSnapshot(playerId, playerName, position, playerAge);
         int potentialScore = calculatePotentialScore(technicalScore, physicalScore, tacticalScore, mentalScore);
         report.update(
-                playerId,
-                playerName,
-                position,
-                playerAge,
+                player.id(),
+                player.name(),
+                player.position(),
+                player.age(),
                 technicalScore,
                 physicalScore,
                 tacticalScore,
@@ -94,5 +100,14 @@ public class ScoutReportService {
 
     private int calculatePotentialScore(int technicalScore, int physicalScore, int tacticalScore, int mentalScore) {
         return Math.round((technicalScore + physicalScore + tacticalScore + mentalScore) / 4.0f);
+    }
+
+    private PlayerSnapshot resolvePlayerSnapshot(String playerId, String playerName, String position, int playerAge) {
+        if (playerId == null || playerId.isBlank()) {
+            return new PlayerSnapshot(null, playerName, position, playerAge);
+        }
+
+        return playerLookupPort.findById(playerId)
+                .orElseThrow(() -> new LinkedPlayerNotFoundException(playerId));
     }
 }

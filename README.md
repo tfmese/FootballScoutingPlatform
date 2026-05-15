@@ -419,3 +419,37 @@ Projede üç ayrı k6 senaryosu hazırdır:
 - `gateway-smoke.js`: sistemin temel erişilebilirliğini hızlı doğrular
 - `gateway-load.js`: kontrollü kullanıcı yükünde süre ve hata metriklerini ölçer
 - `gateway-break.js`: artan yük altında limit davranışını gözlemlemeyi amaçlar
+
+## 13. Dockerize Sistem Kanıtı
+
+docker-compose.yml içinde yalnızca veritabanları değil, uygulama servisleri de tanımlanmıştır:
+
+- postgres-db
+- mongo-db
+- redis
+- player-service
+- scouting-service
+- api-gateway
+
+
+
+## 14 TDD İçin Commit Geçmişi
+
+Projede TDD yaklaşımıyla RED aşamasında önce başarısız test yazılmış, GREEN aşamasında testi geçirecek implementasyon eklenmiş, REFACTOR aşamasında ise kod temizlenmiştir.
+
+
+d6bada5  (TDD RED)      oyuncu create-get akışları için ilk testler eklendi
+03d1435  (TDD GREEN)    oyuncu create-get akışları için minimum implementasyonlar eklendi
+264aed2  (TDD REFACTOR) PlayerService içinde oyuncu oluşturma işi yardımcı metoda ayrıldı.
+c664f34  (TDD RED)      player ve scouting servisleri için CRUD, validation ve hata senaryosu testleri eklendi
+7df136c  (TDD GREEN)    player için JPA, scouting için MongoDB tabanlı CRUD implementasyonları eklendi
+                         ve testler geçirilir hale getirildi
+b9cad44  (TDD REFACTOR) context testleri dış bağımlılık gerektirmeyecek şekilde düzenlendi
+                         + api gateway yönlendirme filtresi eklendi ve api servis rotaları düzeltildi
+e8581f4  TDD            ScoutReport API için playerId doğrulama senaryolarına MockMvc testleri eklendi
+7d25d74  (TDD RED)      gateway için cors ve güvenlik başlığı davranış testleri eklendi
+c031c02  (TDD GREEN)    gateway CORS pattern ayrıştırması testleri geçecek şekilde düzeltildi
+f29e211  (TDD RED)      scouting-service player lookup adapter hata ve response senaryoları eklendi
+cb115f3  (TDD GREEN)    player service http lookup adapter, enjekte edilebilir constructor eklenerek
+                         testleri geçecek şekilde düzenlendi
+

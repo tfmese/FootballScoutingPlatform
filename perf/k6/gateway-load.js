@@ -1,21 +1,15 @@
-/**
- * Yük testi: gateway üzerinden oyuncu ve keşif listelerine sürekli trafik.
- * PDF: "yük testleri".
- *
- * Önkoşul: docker compose --profile app (veya yerelde gateway + servisler).
- * Çalıştırma: k6 run perf/k6/gateway-load.js
- */
+
 import http from "k6/http";
 import { check, sleep } from "k6";
 
 export const options = {
   stages: [
-    { duration: "30s", target: 15 },
-    { duration: "1m", target: 15 },
-    { duration: "20s", target: 0 },
+    { duration: "30s", target: 20 },   // ramp-up
+    { duration: "2m",  target: 50 },   // sabit yük
+    { duration: "30s", target: 0 },    // ramp-down
   ],
   thresholds: {
-    http_req_failed: ["rate<0.1"],
+    http_req_failed: ["rate<0.05"],
     http_req_duration: ["p(95)<3000"],
   },
 };

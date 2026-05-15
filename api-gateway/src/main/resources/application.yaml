@@ -12,17 +12,14 @@ spring:
 
   cloud:
     gateway:
-      routes:
+      mvc:
+        routes:
         - id: player-service-route
           uri: ${PLAYER_SERVICE_URL:http://localhost:8081}
           predicates:
             - Path=/api/players,/api/players/**
-          filters:
-            - StripPrefix=1
 
         - id: scouting-service-route
           uri: ${SCOUTING_SERVICE_URL:http://localhost:8082}
           predicates:
-            - Path=/api/scouts,/api/scouts/**
-          filters:
-            - StripPrefix=1
+            - Path=/api/scouts,/api/scouts/**

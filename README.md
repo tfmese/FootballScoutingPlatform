@@ -176,3 +176,246 @@ Generic kullanım response modelini standartlaştırmak için kullanılmıştır
 - `PageInfo` sayfalama bilgisini ayrı bir değer nesnesi olarak tutar.
 - Controller katmanı bu yapıyı hem oyuncu hem scout listelerinde yeniden kullanır.
 
+## 8. GUI ve Custom Graphics Analizi
+
+Projenin masaüstü arayüzü `MainFrame` içinde iki sekmeli bir operasyon arayüzü kurulmuştur:
+
+- Oyuncu yönetim alanı
+- Scout raporu yönetim alanı
+
+### 8.1 Oyuncu ekranı
+
+`PlayerPanel` içinde:
+
+- tablo bazlı listeleme
+- arama filtresi
+- oyuncu sayısı ve yaş ortalaması metrikleri
+- detay formu
+- CRUD butonları
+
+bulunmaktadır.
+
+![Player screen](images/players.png)
+### 8.2 Scout ekranı
+
+`ScoutReportPanel` içinde:
+
+- rapor tablosu
+- arama ve sıralama
+- linked player seçimi
+- puan giriş alanları
+- ortalama overall metriği
+- özet görsel paneli
+
+bulunmaktadır.
+
+![Player screen](images/scouting-service.png)
+
+### 8.3 Custom graphics
+
+Custom graphics,  `PotentialScoreBarPanel` ile karşılanmaktadır. Bu sınıf, skor alanını dinleyip yüzde değeri hesaplar ve çubuğu `paintComponent(Graphics)` ile kendisi çizer.
+
+![Player screen](images/custom-graphic.png)
+## 9. Hata Yönetimi ve Veri Doğrulama
+
+Her iki serviste de request doğrulama ve hata eşleme katmanı bulunmaktadır.
+
+### 9.1 Request validation
+
+Oyuncu oluşturma ve güncelleme isteklerinde:
+
+- isim boş geçilemez
+- pozisyon boş geçilemez
+- yaş 13 ile 45 arasında olmalıdır
+- preferredFoot yalnızca `Left`, `Right`, `Both` olabilir
+
+Scout raporu isteklerinde:
+
+- `playerId` varsa UUID formatında olmalıdır
+- puanlar 1 ile 100 arasında olmalıdır
+- expectedFee negatif olamaz
+- recommendation ve notes boş geçilemez
+
+### 9.2 Exception mapping
+
+Oyuncu servisinde:
+
+- 404: kayıt bulunamadı
+- 400: invalid body veya invalid path variable
+- 500: beklenmeyen hata
+
+Scout servisinde bunlara ek olarak:
+
+- 404: linked player bulunamadı
+- 502: player-service entegrasyon hatası
+
+
+## 10. Test Analizi
+
+### 10.1 Mevcut otomatik test durumu
+
+`./mvnw.cmd test` komutu çalıştırılmıştır ve sonuç `BUILD SUCCESS` olmuştur.
+
+Özet:
+
+| Metrik | Sonuç |
+|-------|-------|
+| Toplam çalıştırılan test | 47 |
+| Failure | 0 |
+| Error | 0 |
+| Skipped | 2 |
+| Genel durum | Başarılı |
+
+Modül bazlı dağılım:
+
+| Modül | Test durumu |
+|------|-------------|
+| `api-gateway` | 4 test geçti |
+| `player-service` | 17 test, 1 skip |
+| `scouting-service` | 26 test, 1 skip |
+
+### 10.2 Mevcut testler neleri doğrular
+
+#### Application/service seviyesi testler
+
+`PlayerServiceTest` içinde:
+
+- oyuncu oluşturma
+- oyuncu bulma
+- bulunamayan oyuncuda hata fırlatma
+- tüm oyuncuları getirme
+- JDBC üzerinden tüm oyuncuları getirme
+- güncelleme
+- silme
+
+Referanslar:
+
+
+
+`ScoutReportServiceTest` içinde:
+
+- rapor oluşturma
+- güncelleme
+- silme
+- listeleme
+- linked player varsa authoritative veriyi kullanma
+- linked player yoksa hata verme
+- linked player yoksa manuel alanları koruma
+
+
+#### Controller/API seviyesi testler
+
+`PlayerControllerTest` içinde:
+
+- başarılı create
+- başarılı get by id
+- invalid UUID path durumunda 400
+- not found durumunda 404
+- JDBC endpoint doğrulaması
+- invalid request body durumunda 400
+
+
+
+`ScoutReportControllerTest` içinde:
+
+- başarılı create/update/delete
+- invalid playerId durumunda 400
+- unknown linked player durumunda 404
+- player-service lookup fail durumunda 502
+
+
+
+## 11. Sistem ve Performans Testleri
+
+Projemizin test süreci dört ana koldan yürütülmektedir: Birim (Unit) Testleri, Arayüz (GUI) Uçtan Uca Testleri, Docker Ortam Doğrulaması ve k6 ile Performans Testleri.
+
+### 11.1 Birim ve Entegrasyon Testleri (Spring Boot)
+
+Backend servislerinin iş mantığı ve HTTP endpoint'leri Spring Boot test altyapısı (JUnit 5 & MockMvc) ile otomatik olarak test edilmektedir.
+
+| Test Grubu | Kapsam | Sonuç |
+|-----------|-------|-------|
+| **Unit Testler (Servis Katmanı)** | Servislerin iş kuralları (Örn: Potansiyel hesaplama, cache entegrasyonu, validation) | Başarılı (47/47) |
+| **API Testleri (Controller Katmanı)** | Endpoint yanıtları, hata durumları (400, 404, 502) ve JSON mapping | Başarılı |
+
+Test için komut: ./mvnw.cmd test . MockMvc ile postman vb. kullanmadan arkaplanda sahte bir http sunucusu simüle ederek testleri tamamlayabiliyoruzç.
+
+### 11.2 Masaüstü Uygulaması (GUI) Manuel Uçtan Uca Testleri
+
+Kullanıcı deneyiminin doğru çalıştığından emin olmak için masaüstü uygulaması (Swing GUI) üzerinden temel iş akışları test edilmiştir.
+
+| Test Senaryosu | Beklenen Durum                                                                                             | Gerçekleşen |
+|--------|------------------------------------------------------------------------------------------------------------|-----------|
+| **Kayıt Ekleme** | Yeni eklenen futbolcu listeye yansımalı ve veritabanına işlenmelidir.                                      | BAŞARILI |
+| **GUI Validasyonları** | Yaş 13-45 arası girilmezse veya boş alan bırakılırsa GUI uyarı vermelidir.                                 | BAŞARILI |
+| **Scout Raporu Bağlama** | Bir oyuncuya scout raporu yazıldığında, sistem oyuncuyu otomatik olarak Player Service'ten doğrulamalıdır. | BAŞARILI |
+| **Görsel Skor (Custom Graphics)** | Scout yetenek puanları girildikçe "Potential Score" barı grafiksel olarak güncellenmelidir.                | BAŞARILI |
+
+### 11.3 Docker Ortam Doğrulaması
+
+Projenin mikroservis yapısının container ortamında (PostgreSQL, MongoDB, Redis, Gateway, ve Servisler) birbirleriyle haberleşebildiği doğrulanmıştır.
+
+| Doğrulama Adımı | Kontrol Noktası | Sonuç |
+|-----|----------------|--------------|
+| **Docker Compose Up** | Tüm container'ların eksiksiz ve `Running` veya `Healthy` state'e geçmesi | [BAŞARILI] |
+| **API Gateway Erişimi** | `http://localhost:8080/api/players` üzerinden oyuncu listesinin dönebilmesi | [BAŞARILI] |
+
+![Player screen](images/dockerps.png)
+
+### 11.4 Performans ve Yük Testleri (k6)
+
+Sistemin yük altındaki kararlılığını ölçmek için API Gateway üzerinden k6 testleri koşulmuştur.
+**Testleri Çalıştırma Adımları:**
+
+- cd perf/k6
+- k6 run gateway-smoke.js (smoke test)
+- k6 run gateway-load.js (load test)
+- k6 run gateway-break.js (break test)
+
+
+**Test Ortamı:** `[16GB RAM, Ryzen 5 3600]`
+
+**1. Smoke Test **
+*Amaç: Sistemin temel yanıt verebilirliğini kontrol etmek.*
+* **Sanal Kullanıcı (VU):** 5
+* **Süre:** 30 saniye
+* **Sonuç (Başarı Oranı):** `%100`
+* **Ortalama Yanıt Süresi:** `3.04ms  `
+* **p(95) Yanıt Süresi:** `4.08ms`
+
+![Player screen](images/smoketest.png)
+
+
+**2. Load Test (gateway-load.js)**
+*Amaç: Beklenen normal kullanıcı trafiğinde sistemin performansını ölçmek.*
+* **Sanal Kullanıcı (VU):** 0 → 20 (30s) → 50 sabit (2dk) → 0 (30s)
+* **Toplam Süre:** ~3 dakika
+* **Sonuç (Başarı Oranı):** `%100`
+* **Ortalama Yanıt Süresi:** `3.46ms`
+* **p(95) Yanıt Süresi:** `5.46ms`
+* **Threshold (p95 < 3000ms):** `[Geçti ]`
+
+![Player screen](images/loadtest.png)
+
+
+**3. Break Test / Stress Test (gateway-break.js)**
+*Amaç: Sistemin ne kadar yükte kırıldığını veya yavaşladığını gözlemlemek.*
+* **Sanal Kullanıcı Kademesi:** 0 → 50 → 100 → 200 → 300 → 0 (toplam ~4 dakika)
+* **Maksimum VU:** 300
+* **Toplam İstek:** 1.063.185 istek (~4430 istek/saniye)
+* **Gözlemlenen Hata Oranı:** `%0.00` — Threshold ✓ (rate < 0.5)
+* **Ortalama Yanıt Süresi:** `21.19ms`
+* **p(95) Yanıt Süresi:** `48.54ms`
+* **Maksimum Yanıt Süresi:** `258.41ms`
+* **Kırılma / Yavaşlama Noktası:** Sistem 300 VU altında kırılma noktasına ulaşmadı. Tüm istekler başarıyla yanıtlandı (%100 başarı). Yanıt süreleri yük arttıkça doğrusal biçimde yükseldi (max 258ms) ancak kabul edilebilir sınırlar içinde kaldı.
+
+![Player screen](images/breaktest.png)
+
+
+## 12. Performans Test Altyapısı Analizi
+
+Projede üç ayrı k6 senaryosu hazırdır:
+
+- `gateway-smoke.js`: sistemin temel erişilebilirliğini hızlı doğrular
+- `gateway-load.js`: kontrollü kullanıcı yükünde süre ve hata metriklerini ölçer
+- `gateway-break.js`: artan yük altında limit davranışını gözlemlemeyi amaçlar

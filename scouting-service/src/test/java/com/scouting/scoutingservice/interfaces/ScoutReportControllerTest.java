@@ -48,7 +48,7 @@ class ScoutReportControllerTest {
         ScoutReport report = new ScoutReport("1", playerId, "Arda Guler", "AM", 20, 92, 74, 88, 86, 85, 25000000L, "Sign", "Top talent");
         when(service.create(anyString(), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyString(), anyString())).thenReturn(report);
 
-        mockMvc.perform(post("/scouts")
+        mockMvc.perform(post("/api/scouts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerId\":\"" + playerId + "\",\"playerName\":\"Arda Guler\",\"position\":\"AM\",\"playerAge\":20,\"technicalScore\":92,\"physicalScore\":74,\"tacticalScore\":88,\"mentalScore\":86,\"expectedFee\":25000000,\"recommendation\":\"Sign\",\"notes\":\"Top talent\"}"))
                 .andExpect(status().isCreated())
@@ -60,7 +60,7 @@ class ScoutReportControllerTest {
         ScoutReport report = new ScoutReport("1", null, "Kenan Yildiz", "LW", 20, 86, 84, 85, 89, 86, 18000000L, "Monitor", "High upside");
         when(service.getById(eq("1"))).thenReturn(report);
 
-        mockMvc.perform(get("/scouts/{id}", "1"))
+        mockMvc.perform(get("/api/scouts/{id}", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value("1"));
     }
@@ -72,7 +72,7 @@ class ScoutReportControllerTest {
                 new ScoutReport("2", null, "B", "RB", 22, 71, 75, 72, 70, 72, 7500000L, "Monitor", "n2")
         ));
 
-        mockMvc.perform(get("/scouts"))
+        mockMvc.perform(get("/api/scouts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.items.length()").value(2));
     }
@@ -83,7 +83,7 @@ class ScoutReportControllerTest {
         ScoutReport report = new ScoutReport("1", playerId, "Updated", "CM", 22, 81, 79, 83, 85, 82, 12000000L, "Sign", "updated");
         when(service.update(eq("1"), anyString(), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyString(), anyString())).thenReturn(report);
 
-        mockMvc.perform(put("/scouts/{id}", "1")
+        mockMvc.perform(put("/api/scouts/{id}", "1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerId\":\"" + playerId + "\",\"playerName\":\"Updated\",\"position\":\"CM\",\"playerAge\":22,\"technicalScore\":81,\"physicalScore\":79,\"tacticalScore\":83,\"mentalScore\":85,\"expectedFee\":12000000,\"recommendation\":\"Sign\",\"notes\":\"updated\"}"))
                 .andExpect(status().isOk())
@@ -94,7 +94,7 @@ class ScoutReportControllerTest {
     void deleteScoutsShouldReturnNoContent() throws Exception {
         doNothing().when(service).delete(eq("1"));
 
-        mockMvc.perform(delete("/scouts/{id}", "1"))
+        mockMvc.perform(delete("/api/scouts/{id}", "1"))
                 .andExpect(status().isNoContent());
     }
 
@@ -102,14 +102,14 @@ class ScoutReportControllerTest {
     void getScoutByIdWhenNotFoundShouldReturn404() throws Exception {
         when(service.getById(eq("404"))).thenThrow(new ScoutReportNotFoundException("404"));
 
-        mockMvc.perform(get("/scouts/{id}", "404"))
+        mockMvc.perform(get("/api/scouts/{id}", "404"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Scout report not found: 404"));
     }
 
     @Test
     void postScoutsWithInvalidBodyShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/scouts")
+        mockMvc.perform(post("/api/scouts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerName\":\"\",\"position\":\"AM\",\"playerAge\":0,\"technicalScore\":0,\"physicalScore\":0,\"tacticalScore\":0,\"mentalScore\":0,\"expectedFee\":-1,\"recommendation\":\"\",\"notes\":\"\"}"))
                 .andExpect(status().isBadRequest())
@@ -118,7 +118,7 @@ class ScoutReportControllerTest {
 
     @Test
     void postScoutsWithInvalidPlayerIdShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/scouts")
+        mockMvc.perform(post("/api/scouts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerId\":\"not-a-valid-uuid\",\"playerName\":\"X\",\"position\":\"AM\",\"playerAge\":20,\"technicalScore\":50,\"physicalScore\":50,\"tacticalScore\":50,\"mentalScore\":50,\"expectedFee\":1000000,\"recommendation\":\"Monitor\",\"notes\":\"n\"}"))
                 .andExpect(status().isBadRequest())
@@ -130,7 +130,7 @@ class ScoutReportControllerTest {
         ScoutReport report = new ScoutReport("1", null, "Legacy", "ST", 21, 70, 68, 66, 76, 70, 3000000L, "Monitor", "no player link");
         when(service.create(isNull(), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyString(), anyString())).thenReturn(report);
 
-        mockMvc.perform(post("/scouts")
+        mockMvc.perform(post("/api/scouts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerName\":\"Legacy\",\"position\":\"ST\",\"playerAge\":21,\"technicalScore\":70,\"physicalScore\":68,\"tacticalScore\":66,\"mentalScore\":76,\"expectedFee\":3000000,\"recommendation\":\"Monitor\",\"notes\":\"no player link\"}"))
                 .andExpect(status().isCreated())
@@ -143,7 +143,7 @@ class ScoutReportControllerTest {
         when(service.create(eq(playerId), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyString(), anyString()))
                 .thenThrow(new LinkedPlayerNotFoundException(playerId));
 
-        mockMvc.perform(post("/scouts")
+        mockMvc.perform(post("/api/scouts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerId\":\"" + playerId + "\",\"playerName\":\"Arda Guler\",\"position\":\"AM\",\"playerAge\":20,\"technicalScore\":92,\"physicalScore\":74,\"tacticalScore\":88,\"mentalScore\":86,\"expectedFee\":25000000,\"recommendation\":\"Sign\",\"notes\":\"Top talent\"}"))
                 .andExpect(status().isNotFound())
@@ -156,7 +156,7 @@ class ScoutReportControllerTest {
         when(service.create(eq(playerId), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyString(), anyString()))
                 .thenThrow(new PlayerLookupFailedException("boom"));
 
-        mockMvc.perform(post("/scouts")
+        mockMvc.perform(post("/api/scouts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerId\":\"" + playerId + "\",\"playerName\":\"Arda Guler\",\"position\":\"AM\",\"playerAge\":20,\"technicalScore\":92,\"physicalScore\":74,\"tacticalScore\":88,\"mentalScore\":86,\"expectedFee\":25000000,\"recommendation\":\"Sign\",\"notes\":\"Top talent\"}"))
                 .andExpect(status().isBadGateway())

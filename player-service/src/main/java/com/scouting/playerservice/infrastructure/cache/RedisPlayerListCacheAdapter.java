@@ -49,7 +49,6 @@ public final class RedisPlayerListCacheAdapter implements PlayerListCachePort {
                 redis.opsForValue().set(ALL_PLAYERS_KEY, json);
             }
         } catch (Exception ignored) {
-            // önbellek yazılamazsa sessizce yoksay; bir sonraki okuma DB'den gelir
         }
     }
 

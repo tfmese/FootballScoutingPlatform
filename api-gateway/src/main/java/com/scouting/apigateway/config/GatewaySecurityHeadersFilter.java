@@ -12,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Tüm gateway yanıtlarına üretim benzeri güvenlik HTTP başlıkları ekler (tek sorumluluk).
+ * Tüm gateway yanıtlarına güvenlik HTTP başlıkları ekler.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 50)

@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Tarayıcıdan gateway üzerinden API çağrıları için CORS (tek sorumluluk).
+ * Tarayıcıdan gateway üzerinden API çağrıları için CORS yapılandırması.
  */
 @Configuration
 public class GatewayCorsConfiguration implements WebMvcConfigurer {

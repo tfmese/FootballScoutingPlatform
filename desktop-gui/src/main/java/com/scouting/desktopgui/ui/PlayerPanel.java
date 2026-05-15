@@ -333,8 +333,8 @@ public class PlayerPanel extends JPanel {
             throw new IllegalArgumentException("Position cannot be empty.");
         }
         int age = Integer.parseInt(ageField.getText().trim());
-        if (age < 14 || age > 45) {
-            throw new IllegalArgumentException("Age should be between 14 and 45.");
+        if (age < 13 || age > 45) {
+            throw new IllegalArgumentException("Age should be between 13 and 45.");
         }
         if (clubField.getText().trim().isBlank()) {
             throw new IllegalArgumentException("Club cannot be empty.");

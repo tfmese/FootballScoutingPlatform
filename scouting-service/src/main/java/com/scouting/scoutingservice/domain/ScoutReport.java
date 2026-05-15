@@ -58,7 +58,7 @@ public class ScoutReport {
     }
 
     /**
-     * Yeni rapor oluşturma için Builder (Design Pattern — alan sayısı arttıkça okunabilirlik).
+     * Yeni rapor oluşturma için Builder.
      */
     public static Builder builder() {
         return new Builder();

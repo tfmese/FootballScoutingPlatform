@@ -36,9 +36,9 @@ public class PlayerListCacheConfiguration {
     @ConditionalOnProperty(prefix = "player.cache.redis", name = "enabled", havingValue = "true")
     public PlayerListCachePort redisPlayerListCachePort(
             StringRedisTemplate playerListStringRedisTemplate,
-            ObjectMapper objectMapper,
             RedisPlayerCacheProperties props
     ) {
+        ObjectMapper objectMapper = new ObjectMapper();
         return new RedisPlayerListCacheAdapter(playerListStringRedisTemplate, objectMapper, props.getTtlSeconds());
     }
 

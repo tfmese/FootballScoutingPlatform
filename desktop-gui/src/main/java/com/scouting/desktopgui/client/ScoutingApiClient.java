@@ -186,7 +186,7 @@ public class ScoutingApiClient {
                 message = root.get("message").asText();
             }
         } catch (Exception ignored) {
-            // keep fallback message
+
         }
         throw new IOException(message);
     }
@@ -199,13 +199,13 @@ public class ScoutingApiClient {
         if (useGateway) {
             return gatewayBaseUrl + "/api/players" + suffix;
         }
-        return playerServiceBaseUrl + "/players" + suffix;
+        return playerServiceBaseUrl + "/api/players" + suffix;
     }
 
     private String resolveScoutsUrl(String suffix) {
         if (useGateway) {
             return gatewayBaseUrl + "/api/scouts" + suffix;
         }
-        return scoutingServiceBaseUrl + "/scouts" + suffix;
+        return scoutingServiceBaseUrl + "/api/scouts" + suffix;
     }
 }

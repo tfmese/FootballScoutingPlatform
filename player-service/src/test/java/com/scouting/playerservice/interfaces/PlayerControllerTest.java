@@ -44,7 +44,7 @@ class PlayerControllerTest {
         Player player = new Player(UUID.randomUUID(), "Amir Murillo", "RB", 30, "Marseille", "Right");
         when(playerService.createPlayer(anyString(), anyString(), anyInt(), anyString(), anyString())).thenReturn(player);
 
-        mockMvc.perform(post("/players")
+        mockMvc.perform(post("/api/players")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Amir Murillo\",\"position\":\"RB\",\"age\":30,\"club\":\"Marseille\",\"preferredFoot\":\"Right\"}"))
                 .andExpect(status().isCreated())
@@ -57,14 +57,14 @@ class PlayerControllerTest {
         Player player = new Player(playerId, "Emmanuel Agbadou", "CB", 28, "Wolves", "Right");
         when(playerService.getPlayerById(eq(playerId))).thenReturn(player);
 
-        mockMvc.perform(get("/players/{id}", playerId))
+        mockMvc.perform(get("/api/players/{id}", playerId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(playerId.toString()));
     }
 
     @Test
     void getPlayerByIdWithInvalidUuidPathShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/players/{id}", "not-a-uuid"))
+        mockMvc.perform(get("/api/players/{id}", "not-a-uuid"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Geçersiz yol parametresi: id"));
     }
@@ -74,7 +74,7 @@ class PlayerControllerTest {
         UUID playerId = UUID.randomUUID();
         when(playerService.getPlayerById(eq(playerId))).thenThrow(new PlayerNotFoundException(playerId));
 
-        mockMvc.perform(get("/players/{id}", playerId))
+        mockMvc.perform(get("/api/players/{id}", playerId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Player not found: " + playerId));
     }
@@ -85,7 +85,7 @@ class PlayerControllerTest {
         Player second = new Player(UUID.randomUUID(), "B", "RB", 25, "Club B", "Right");
         when(playerService.getAllPlayers()).thenReturn(List.of(first, second));
 
-        mockMvc.perform(get("/players"))
+        mockMvc.perform(get("/api/players"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.items.length()").value(2));
     }
@@ -96,7 +96,7 @@ class PlayerControllerTest {
         Player second = new Player(UUID.randomUUID(), "B", "RB", 25, "Club B", "Right");
         when(playerService.getAllPlayersViaJdbc()).thenReturn(List.of(first, second));
 
-        mockMvc.perform(get("/players/jdbc"))
+        mockMvc.perform(get("/api/players/jdbc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Players retrieved via JDBC"))
                 .andExpect(jsonPath("$.data.items.length()").value(2));
@@ -108,7 +108,7 @@ class PlayerControllerTest {
         Player updated = new Player(playerId, "Updated", "CM", 27, "Updated FC", "Both");
         when(playerService.updatePlayer(eq(playerId), anyString(), anyString(), anyInt(), anyString(), anyString())).thenReturn(updated);
 
-        mockMvc.perform(put("/players/{id}", playerId)
+        mockMvc.perform(put("/api/players/{id}", playerId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Updated\",\"position\":\"CM\",\"age\":27,\"club\":\"Updated FC\",\"preferredFoot\":\"Both\"}"))
                 .andExpect(status().isOk())
@@ -120,13 +120,13 @@ class PlayerControllerTest {
         UUID playerId = UUID.randomUUID();
         doNothing().when(playerService).deletePlayer(eq(playerId));
 
-        mockMvc.perform(delete("/players/{id}", playerId))
+        mockMvc.perform(delete("/api/players/{id}", playerId))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     void postPlayersWithInvalidBodyShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/players")
+        mockMvc.perform(post("/api/players")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"position\":\"RB\",\"age\":10,\"club\":\"\",\"preferredFoot\":\"\"}"))
                 .andExpect(status().isBadRequest())

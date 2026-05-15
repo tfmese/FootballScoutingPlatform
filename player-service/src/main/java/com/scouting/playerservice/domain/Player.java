@@ -25,7 +25,6 @@ public class Player {
     @Column(length = 120)
     private String club;
 
-    // Keep the column backward-compatible with existing rows while the data is backfilled.
     @Column(name = "preferred_foot", length = 16)
     private String preferredFoot;
 

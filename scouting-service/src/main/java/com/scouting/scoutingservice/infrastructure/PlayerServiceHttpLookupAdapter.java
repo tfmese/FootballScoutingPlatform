@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scouting.scoutingservice.application.PlayerLookupFailedException;
 import com.scouting.scoutingservice.application.port.PlayerLookupPort;
 import com.scouting.scoutingservice.application.port.PlayerSnapshot;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +23,7 @@ public class PlayerServiceHttpLookupAdapter implements PlayerLookupPort {
     private final ObjectMapper objectMapper;
     private final String playerServiceBaseUrl;
 
+    @Autowired
     public PlayerServiceHttpLookupAdapter(
             @Value("${integration.player-service.base-url:http://localhost:8081}") String playerServiceBaseUrl
     ) {
@@ -41,7 +43,7 @@ public class PlayerServiceHttpLookupAdapter implements PlayerLookupPort {
     @Override
     public Optional<PlayerSnapshot> findById(String playerId) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(playerServiceBaseUrl + "/players/" + playerId))
+                .uri(URI.create(playerServiceBaseUrl + "/api/players/" + playerId))
                 .GET()
                 .build();
 

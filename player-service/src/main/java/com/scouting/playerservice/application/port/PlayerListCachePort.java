@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Oyuncu listesi önbelleği (DIP): uygulama katmanı Redis/JVM gibi detayları bilmez.
+ * Oyuncu listesi önbelleği için port tanımı.
  */
 public interface PlayerListCachePort {
 

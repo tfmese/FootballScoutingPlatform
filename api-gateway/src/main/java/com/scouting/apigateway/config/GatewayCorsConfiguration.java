@@ -28,9 +28,18 @@ public class GatewayCorsConfiguration implements WebMvcConfigurer {
             return new String[]{"*"};
         }
         String[] parts = raw.split(",");
+        int writeIndex = 0;
         for (int i = 0; i < parts.length; i++) {
             parts[i] = parts[i].trim();
+            if (!parts[i].isBlank()) {
+                parts[writeIndex++] = parts[i];
+            }
         }
-        return parts;
+        if (writeIndex == 0) {
+            return new String[]{"*"};
+        }
+        String[] normalized = new String[writeIndex];
+        System.arraycopy(parts, 0, normalized, 0, writeIndex);
+        return normalized;
     }
 }

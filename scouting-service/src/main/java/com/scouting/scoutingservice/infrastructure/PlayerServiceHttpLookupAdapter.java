@@ -25,8 +25,16 @@ public class PlayerServiceHttpLookupAdapter implements PlayerLookupPort {
     public PlayerServiceHttpLookupAdapter(
             @Value("${integration.player-service.base-url:http://localhost:8081}") String playerServiceBaseUrl
     ) {
-        this.httpClient = HttpClient.newHttpClient();
-        this.objectMapper = new ObjectMapper();
+        this(playerServiceBaseUrl, HttpClient.newHttpClient(), new ObjectMapper());
+    }
+
+    PlayerServiceHttpLookupAdapter(
+            String playerServiceBaseUrl,
+            HttpClient httpClient,
+            ObjectMapper objectMapper
+    ) {
+        this.httpClient = httpClient;
+        this.objectMapper = objectMapper;
         this.playerServiceBaseUrl = normalize(playerServiceBaseUrl);
     }
 

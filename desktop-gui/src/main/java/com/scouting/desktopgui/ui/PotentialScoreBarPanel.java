@@ -11,7 +11,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 /**
- * Swing: standart bileşenlerin dışında {@link #paintComponent(Graphics)} ile çizilen potansiyel skor çubuğu (TBL324 özel grafik).
+ * Swing: {@link #paintComponent(Graphics)} ile çizilen potansiyel skor çubuğu bileşeni.
  */
 public class PotentialScoreBarPanel extends JPanel {
 

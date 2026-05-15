@@ -107,3 +107,72 @@ Scout raporu bir oyuncuya bağlıysa, `scouting-service` oyuncu bilgisini doğru
 
 Bu sayede bağlı oyuncu senaryosunda kaynak veri `player-service` olur; manuel alanların hatalı veya manipüle edilmiş gelmesi engellenir.
 
+## 6. SOLID ve OOP
+
+
+### 6.1 Single Responsibility Principle
+
+Her sınıfın ana sorumluluğu mümkün olduğunca dar tutulmuştur:
+
+- `PlayerController` HTTP isteklerini yönetir, iş kuralı içermez.
+- `PlayerService` iş akışını yönetir, HTTP veya SQL detayına girmez.
+- `JdbcTemplatePlayerQueryAdapter` yalnızca JDBC sorgusundan sorumludur.
+- `RedisPlayerListCacheAdapter` yalnızca cache işlemlerini üstlenir.
+- `GlobalExceptionHandler` yalnızca hata-response eşlemesini yapar.
+
+
+### 6.2 Open/Closed Principle
+
+Mevcut davranış, ana servis sınıflarını bozmak zorunda kalmadan yeni adapterlarla genişletilebilmektedir. Önreğin:
+
+- Uygulama katmanı `PlayerListCachePort` arayüzünü bilir.
+- Gerçek ortamda `RedisPlayerListCacheAdapter` kullanılabilir.
+- Test veya cache istemeyen senaryoda `NoOpPlayerListCacheAdapter` kullanılabilir.
+
+Yani yeni bir cache stratejisi eklemek için `PlayerService` sınıfını yeniden yazmak gerekmez.
+
+
+
+### 6.3 Liskov Substitution Principle
+
+Arayüz üzerinden kullanılan somut sınıflar, birbirlerinin yerine geçebilecek biçimde tasarlanmıştır:
+
+- `PlayerListCachePort` için `RedisPlayerListCacheAdapter` ve `NoOpPlayerListCacheAdapter`
+- `PlayerLookupPort` için HTTP adapterı ve test stub'ı
+- `PlayerRepository` ve `ScoutReportRepository` için test içi in-memory implementasyonlar
+
+
+### 6.4 Interface Segregation Principle
+
+Arayüzler büyük ve her şeyi kapsayan yapılara dönüştürülmemiştir. Örneğin:
+
+- `PlayerJdbcQueryPort` yalnızca JDBC sorgu ihtiyacını taşır.
+- `PlayerListCachePort` yalnızca cache sözleşmesini taşır.
+- `PlayerLookupPort` yalnızca oyuncu lookup ihtiyacını tanımlar.
+
+Bu sayede sınıflar ihtiyaç duymadıkları metodlara bağımlı kalmaz.
+
+### 6.5 Dependency Inversion Principle
+
+Service katmanı altyapı sınıflarına değil soyutlamalara bağımlıdır:
+
+- `PlayerService`, `PlayerRepository`, `PlayerListCachePort`, `PlayerJdbcQueryPort` alır.
+- `ScoutReportService`, `ScoutReportRepository` ve `PlayerLookupPort` alır.
+
+### 6.6 OOP
+
+Projede OOP yalnızca sınıf kullanımı düzeyinde değil, davranış ve veri bütünlüğü açısından da görülmektedir:
+
+- Encapsulation: `Player` içinde `update`, `normalizeClub`, `normalizePreferredFoot` ile veri normalizasyonu nesnenin içinde tutulur.
+- Abstraction: repository ve port arayüzleri.
+- Composition over inheritance: davranışın çoğu interface + adapter kompozisyonuyla kurulmuştur.
+- Builder Pattern: `ScoutReport.builder()` çok alanlı nesne oluşturmayı okunabilir kılar.
+-
+## 7. Generic Yapıların Kullanımı
+
+Generic kullanım response modelini standartlaştırmak için kullanılmıştır.
+
+- `PagedResult<T>` her tür listeyi tip güvenli biçimde taşır.
+- `PageInfo` sayfalama bilgisini ayrı bir değer nesnesi olarak tutar.
+- Controller katmanı bu yapıyı hem oyuncu hem scout listelerinde yeniden kullanır.
+
